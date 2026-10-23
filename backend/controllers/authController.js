@@ -2,6 +2,23 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Evaluation = require("../models/Evaluation");
+const storage = require("../services/storage");
+
+// When a guest signs up or logs in, their evaluations move to the account instead of being lost.
+// The guest's own token (sent as the usual Bearer header) proves which guest they were.
+const claimGuestEvaluations = async (req, userId) => {
+  const header = req.headers.authorization || "";
+  if (!header.startsWith("Bearer ")) return 0;
+  try {
+    const decoded = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET);
+    if (!decoded.guest || !decoded.guestId) return 0;
+    const result = await Evaluation.updateMany({ guestId: decoded.guestId }, { $set: { userId }, $unset: { guestId: "" } });
+    return result.modifiedCount;
+  } catch {
+    return 0;
+  }
+};
 
 const createToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -35,7 +52,8 @@ const registerUser = async (req, res) => {
     });
 
     const token = createToken(user._id.toString());
-    return res.status(201).json({ token });
+    const claimed = await claimGuestEvaluations(req, user._id);
+    return res.status(201).json({ token, claimedReports: claimed });
   } catch (error) {
     return res.status(500).json({ message: "Registration failed" });
   }
@@ -60,7 +78,8 @@ const loginUser = async (req, res) => {
     }
 
     const token = createToken(user._id.toString());
-    return res.status(200).json({ token });
+    const claimed = await claimGuestEvaluations(req, user._id);
+    return res.status(200).json({ token, claimedReports: claimed });
   } catch (error) {
     return res.status(500).json({ message: "Login failed" });
   }
@@ -125,11 +144,25 @@ const updateSettings = async (req, res) => {
   }
 };
 
+// DELETE /api/auth/account — removes the user, every evaluation and every stored photo
+const deleteAccount = async (req, res) => {
+  const userId = req.user.userId;
+  const evaluations = await Evaluation.find({ userId }, { images: 1 }).lean();
+  const publicIds = evaluations.flatMap((e) =>
+    ["front", "back", "left", "right", "teeth"].map((v) => e.images?.[v]?.publicId).filter(Boolean)
+  );
+  await Evaluation.deleteMany({ userId });
+  await User.deleteOne({ _id: userId });
+  storage.deleteImages(publicIds).catch((error) => console.error("Cloudinary delete failed:", error.message));
+  return res.status(200).json({ message: "Account deleted", deletedReports: evaluations.length });
+};
+
 const logoutUser = async (req, res) => {
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
 module.exports = {
+  deleteAccount,
   guestLogin,
   registerUser,
   loginUser,

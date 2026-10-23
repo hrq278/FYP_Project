@@ -1,4 +1,5 @@
 import { UserRound } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
 import { colors } from "../theme";
@@ -45,10 +46,13 @@ export function GuestLink({ onPress, disabled }) {
 
 export function TermsNote() {
   const { t } = useTranslation();
+  const router = useRouter();
   return (
-    <AppText variant="caption" weight={500} color={colors.textMuted} align="center">
-      {t("auth.terms", { terms: t("auth.termsLink"), privacy: t("auth.privacyLink") })}
-    </AppText>
+    <Pressable onPress={() => router.push("/legal")} accessibilityRole="link" hitSlop={6}>
+      <AppText variant="caption" weight={500} color={colors.textMuted} align="center" style={styles.underline}>
+        {t("auth.terms", { terms: t("auth.termsLink"), privacy: t("auth.privacyLink") })}
+      </AppText>
+    </Pressable>
   );
 }
 

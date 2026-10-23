@@ -146,7 +146,7 @@ export function ConfirmDialog({ visible, title, body, confirmLabel, cancelLabel,
         {body ? <AppText variant="body" color={colors.textSecondary}>{body}</AppText> : null}
         <View style={dialogStyles.actions}>
           <Button title={cancelLabel} variant="outline" size="normal" onPress={onCancel} style={dialogStyles.btn} />
-          <Button title={confirmLabel} variant={destructive ? "dark" : "primary"} size="normal" onPress={onConfirm} style={dialogStyles.btn} />
+          <Button title={confirmLabel} variant={destructive ? "danger" : "primary"} size="normal" onPress={onConfirm} style={dialogStyles.btn} />
         </View>
       </View>
     </View>

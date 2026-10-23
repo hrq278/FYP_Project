@@ -4,6 +4,29 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 7 — Mobile: History, Compare, Profile (2026-10-24)
+
+**Status:** done (verified in the browser with real backend + ML service and Atlas data).
+
+### What was done
+- **History** `app/(tabs)/history.jsx` (spec §4.14): search by breed or date (debounced; "24 Oct", "24 October 2026", "24/10" use the phone's time zone), filter chips All / Recommended / Caution / Not Recommended, paginated list (loads more on scroll), pull to refresh, **Select** button or long-press → checkboxes, "Compare (2)" keeps the last two picked and explains why when it can't compare (not finished / different purposes). Separate empty states for "no reports yet" and "no results" (with Clear search and filters).
+- **Compare** `app/compare/[a]/[b].jsx`: A/B cards (winner outlined green), table for breed, age, health and fit for purpose with 3-segment bars, green "Better choice" card with the reason, "Open Animal X report".
+- **Profile** `app/(tabs)/profile.jsx`: account card, language cards (English / اردو), About, **How we use your data** (`app/legal.jsx`, also opened from the terms note on Login/Register), Log out, **Delete account** with a red confirm button, app version.
+- **Guests**: banner + Sign up link on History. Instead of a separate local list, guest reports stay on the server and are **moved to the account on sign-up or log-in** (`claimedReports` in the response).
+- **Backend**: `DELETE /api/auth/account` (account, reports and their Cloudinary photos; guests get 403); date search with `tz` offset; guest-report claim in register/login.
+- **Health check fix**: a Module 5 test animal was Not Recommended (score 25) because the disease model called the **teeth photo** foot-and-mouth (0.88) while all four body photos were healthy. Measured on 80 healthy photos from the dentition dataset: 32 FMD, 14 uncertain, 34 healthy, so the model can't be trusted on mouth close-ups. The pipeline now sends only the four body photos to the health model; the teeth photo is used for age only. Screen text changed from "Mouth, skin and hooves" to "Skin, legs and hooves" (English and Urdu).
+- New `danger` button variant used by destructive confirm dialogs.
+
+### How it was tested
+- Backend: **68 tests** pass (new: date search incl. time zone, guest claim, delete account, guest 403, health gets 4 body views). ML: 48 pass.
+- Playwright run against the live app: filter → only the Not Recommended animal; search "nili" and "24 Oct" → only Nili-Ravi; different-purpose hint shown; compare page opens; a guest's report moves to the new account on sign-up and the banner disappears; Delete account → back to Login and the old password returns 401; English and Urdu screenshots reviewed; no page errors.
+
+### Open items
+- History thumbnails show only once Cloudinary works (FIXES.md item 1).
+- Pull-to-refresh and long-press still to try on a phone (FIXES.md item 5).
+
+---
+
 ## Module 6 — Mobile: Result, Ask, PDF, Share (2026-10-23)
 
 **Status:** done (verified in the browser with real backend + ML service; PDF, WhatsApp and text-to-speech still to try on a phone).

@@ -2,7 +2,7 @@
 
 Things only you can do (accounts, keys, devices, data). Claude keeps this list current: solved items are removed, new ones are added.
 
-Last checked: 2026-10-23
+Last checked: 2026-10-24
 
 ---
 
@@ -44,6 +44,7 @@ Also make sure your current IP is allowed under Atlas → **Network Access**.
 ## 5. Test on a real Android phone (Expo Go)
 
 Everything so far was checked in a browser at phone size. On a phone, check:
+- History: pull down to refresh, long-press a report to start selecting, and scrolling to load more;
 - fonts (English and Urdu) and switching language (the app restarts once into right-to-left);
 - the live camera, flash, the camera-permission prompt and Gallery;
 - keyboard covering inputs on Login, Register and Purpose;

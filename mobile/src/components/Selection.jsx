@@ -45,7 +45,7 @@ export function SelectCard({ selected, onPress, children, style, accessibilityLa
 }
 
 // Filter chip / suggestion chip / small info chip
-export function Chip({ label, icon: Icon, active = false, variant = "filter", onPress, style }) {
+export function Chip({ label, icon: Icon, iconColor, active = false, variant = "filter", onPress, style }) {
   const suggestion = variant === "suggestion";
   const bg = active ? colors.primary : suggestion ? colors.primaryTintSoft : colors.surface;
   const border = active ? colors.primary : suggestion ? colors.primaryTintBorder : colors.border;
@@ -58,7 +58,7 @@ export function Chip({ label, icon: Icon, active = false, variant = "filter", on
       accessibilityState={onPress ? { selected: active } : undefined}
       style={[styles.chip, { backgroundColor: bg, borderColor: border }, style]}
     >
-      {Icon ? <Icon size={18} color={active ? colors.white : colors.primary} strokeWidth={2.4} /> : null}
+      {Icon ? <Icon size={18} color={active ? colors.white : iconColor || colors.primary} strokeWidth={2.4} /> : null}
       <AppText variant="caption" weight={700} color={text}>
         {label}
       </AppText>

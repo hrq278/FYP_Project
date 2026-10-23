@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react-native";
+import { AlertTriangle, Check, CheckCircle2, XCircle } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
@@ -122,6 +122,11 @@ export function ReportListItem({ item, onPress, selectMode = false, selected = f
       accessibilityState={selectMode ? { selected } : undefined}
       style={({ pressed }) => [styles.item, selected && styles.itemSelected, pressed && { opacity: 0.85 }]}
     >
+      {selectMode ? (
+        <View style={[styles.checkbox, selected && styles.checkboxOn]} accessibilityRole="checkbox" accessibilityState={{ checked: selected }}>
+          {selected ? <Check size={20} color={colors.white} strokeWidth={3} /> : null}
+        </View>
+      ) : null}
       <View style={styles.thumb}>
         {item.thumbnail ? (
           <Image source={{ uri: item.thumbnail }} style={styles.thumbImage} accessibilityIgnoresInvertColors />
@@ -140,7 +145,7 @@ export function ReportListItem({ item, onPress, selectMode = false, selected = f
           <AppText variant="small" color={colors.textMuted}>{t(`status.${item.status}`, { defaultValue: "" })}</AppText>
         ) : null}
       </View>
-      <Chevron size={24} color={colors.iconMuted} />
+      {selectMode ? null : <Chevron size={24} color={colors.iconMuted} />}
     </Pressable>
   );
 }
@@ -170,5 +175,7 @@ const styles = StyleSheet.create({
   thumb: { width: 64, height: 64, borderRadius: 14, backgroundColor: "#EDE3D2", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   thumbImage: { width: 64, height: 64 },
   itemText: { flex: 1, gap: 2 },
-  itemBadge: { marginTop: 4 }
+  itemBadge: { marginTop: 4 },
+  checkbox: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, borderColor: colors.iconInactive, alignItems: "center", justifyContent: "center" },
+  checkboxOn: { backgroundColor: colors.primary, borderColor: colors.primary }
 });

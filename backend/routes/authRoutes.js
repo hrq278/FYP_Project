@@ -1,5 +1,6 @@
 const express = require("express");
 const {
+	deleteAccount,
 	guestLogin,
 	registerUser,
 	loginUser,
@@ -19,5 +20,6 @@ router.post("/login", wrap(loginUser));
 router.get("/profile", authMiddleware, requireAccount, wrap(getProfile));
 router.put("/settings", authMiddleware, requireAccount, wrap(updateSettings));
 router.post("/logout", authMiddleware, wrap(logoutUser));
+router.delete("/account", authMiddleware, requireAccount, wrap(deleteAccount));
 
 module.exports = router;

@@ -78,16 +78,17 @@ Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to `http://<your PC's LAN IP>:30
 
 | Method | Endpoint | Auth | Notes |
 |---|---|---|---|
-| POST | `/api/auth/register` | — | `{ name, email, password }` → `{ token }` |
-| POST | `/api/auth/login` | — | `{ email, password }` → `{ token }` |
+| POST | `/api/auth/register` | — | `{ name, email, password }` → `{ token, claimedReports }` (send a guest Bearer token to move that guest's reports to the account) |
+| POST | `/api/auth/login` | — | `{ email, password }` → `{ token, claimedReports }` (same guest claim) |
 | GET | `/api/auth/profile` | Bearer | |
 | PUT | `/api/auth/settings` | Bearer | `{ preferredLanguage, alertsEnabled }` |
 | POST | `/api/auth/logout` | Bearer | |
+| DELETE | `/api/auth/account` | Bearer (account) | Deletes the account, its reports and their photos → `{ deletedReports }` |
 | POST | `/api/auth/guest` | — | → `{ token, guest: true, guestId }` (30 days; profile/settings return 403 for guests) |
 | POST | `/api/evaluations/quality` | Bearer | multipart `image` + `view` (front/back/left/right/teeth) → `{ quality: { ok, issues }, species }` (species pre-check on the front photo only) |
 | POST | `/api/evaluations` | Bearer | multipart `front, back, left, right, teeth` + `purpose` (milk/breeding/qurbani/meat/farm_work/other), optional `budget`, `sellerPrice` ("2,50,000" accepted), `experience`, `language`, `quality` (JSON) → **202** `{ id, reportId, status: "processing" }` |
 | GET | `/api/evaluations/:id` | Bearer (owner) | `{ evaluation }`: `status` (processing/done/failed/rejected), `steps[]`, `results`, `verdict`, `score`, `scoreBreakdown`, `report`, `images` (Cloudinary URLs). Poll every 1.5 s while processing |
-| GET | `/api/evaluations?verdict=&q=&page=` | Bearer | History, newest first, 20 per page: `{ items: [{ id, reportId, status, purpose, verdict, score, species, breed, thumbnail, createdAt }], total }` |
+| GET | `/api/evaluations?verdict=&q=&tz=&page=` | Bearer | History, newest first, 20 per page; `q` matches breed, report id or a date like "24 Oct" (`tz` = `getTimezoneOffset()` minutes): `{ items: [{ id, reportId, status, purpose, verdict, score, species, breed, thumbnail, createdAt }], total }` |
 | DELETE | `/api/evaluations/:id` | Bearer (owner) | Deletes the evaluation and its Cloudinary photos |
 | POST | `/api/evaluations/:id/chat` | Bearer (owner) | `{ message }` → `{ answer, suggestions[3], chat }` (last 20 messages kept). 503 with default suggestions when no LLM key; 409 until the report is ready |
 | POST | `/api/evaluations/compare` | Bearer | `{ ids: [a, b] }` (same purpose, both done) → `{ winnerId, reason, reasonSource, animals[A, B], rows }`; winner by score, reason worded by the LLM when available |

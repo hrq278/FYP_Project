@@ -1,12 +1,13 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
-import { colors, radii, touch } from "../theme";
+import { colors, radii, touch, verdictColors } from "../theme";
 import AppText from "./AppText";
 
 const VARIANTS = {
   primary: { bg: colors.accent, pressed: "#D4930F", text: colors.textPrimary, border: null },
   outline: { bg: "transparent", pressed: colors.primaryTint, text: colors.primary, border: colors.primary },
   neutral: { bg: colors.surface, pressed: colors.surfaceMuted, text: colors.textPrimary, border: colors.border },
-  dark: { bg: colors.primary, pressed: colors.primaryDark, text: colors.white, border: null }
+  dark: { bg: colors.primary, pressed: colors.primaryDark, text: colors.white, border: null },
+  danger: { bg: verdictColors.not_recommended.fill, pressed: "#9E1F25", text: colors.white, border: null }
 };
 
 /**

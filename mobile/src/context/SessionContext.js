@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { fetchProfile, guestLogin, logoutUser, saveSettings, TOKEN_KEY } from "../../services/api";
+import { deleteAccount as deleteAccountApi, fetchProfile, guestLogin, logoutUser, saveSettings, TOKEN_KEY } from "../../services/api";
 import i18n from "../i18n";
 
 const GUEST_KEY = "guest";
@@ -62,14 +62,21 @@ export function SessionProvider({ children }) {
     setState((s) => ({ ...s, token: null, isGuest: false, user: null }));
   }, []);
 
+  // Deletes the account on the server, then clears the session on this phone
+  const deleteAccount = useCallback(async () => {
+    await deleteAccountApi();
+    await AsyncStorage.multiRemove([TOKEN_KEY, GUEST_KEY]);
+    setState((s) => ({ ...s, token: null, isGuest: false, user: null }));
+  }, []);
+
   const finishOnboarding = useCallback(async () => {
     await AsyncStorage.setItem(ONBOARDING_KEY, "1");
     setState((s) => ({ ...s, onboardingDone: true }));
   }, []);
 
   const value = useMemo(
-    () => ({ ...state, signIn, signInAsGuest, signOut, finishOnboarding, refreshProfile: loadProfile }),
-    [state, signIn, signInAsGuest, signOut, finishOnboarding, loadProfile]
+    () => ({ ...state, signIn, signInAsGuest, signOut, deleteAccount, finishOnboarding, refreshProfile: loadProfile }),
+    [state, signIn, signInAsGuest, signOut, deleteAccount, finishOnboarding, loadProfile]
   );
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

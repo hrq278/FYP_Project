@@ -230,7 +230,7 @@
       "species": "Cow or buffalo",
       "breed": "From the body photos",
       "age": "Reading the teeth…",
-      "health": "Mouth, skin and hooves",
+      "health": "Skin, legs and hooves",
       "report": "For: {{purpose}}"
     },
     "uploading": "Uploading photos…",
@@ -263,7 +263,7 @@
       "uncertain": "Not conclusive"
     },
     "healthNote": {
-      "healthy": "Mouth, skin & hooves clear",
+      "healthy": "Skin, legs & hooves clear",
       "foot-and-mouth": "See a vet before buying",
       "lumpy": "See a vet before buying",
       "uncertain": "Check mouth, skin and hooves"
@@ -332,5 +332,60 @@
       "How much milk will it give?",
       "Is the price fair?"
     ]
+  },
+  "history": {
+    "title": "History",
+    "select": "Select",
+    "cancel": "Cancel",
+    "search": "Search breed or date",
+    "all": "All",
+    "selected": "{{count}} selected · pick 2 to compare",
+    "compare": "Compare ({{count}})",
+    "samePurpose": "Pick 2 reports with the same buying purpose to compare.",
+    "pickDone": "Only finished reports can be compared.",
+    "noResults": "No reports match.",
+    "clearFilters": "Clear search and filters",
+    "guestBanner": "You're using guest mode. Sign up to keep your reports safe on any phone.",
+    "signUp": "Sign up",
+    "loadError": "Couldn't load your reports.",
+    "a11ySelect": "Select report",
+    "a11ySearch": "Search reports"
+  },
+  "compare": {
+    "title": "Compare",
+    "buyingFor": "Buying for {{purpose}}",
+    "breed": "Breed",
+    "age": "Age",
+    "health": "Health",
+    "fitFor": "Fit for {{purpose}}",
+    "better": "Better choice for {{purpose}}: Animal {{letter}}",
+    "open": "Open Animal {{letter}} report",
+    "error": "Couldn't compare these reports.",
+    "unknown": "—"
+  },
+  "profileFull": {
+    "account": "Account",
+    "deleteAccount": "Delete account",
+    "deleteTitle": "Delete your account?",
+    "deleteBody": "Your account, all your reports and their photos will be deleted. This can't be undone.",
+    "deleteConfirm": "Delete all",
+    "deleteError": "Couldn't delete the account. Please try again.",
+    "privacy": "How we use your data",
+    "version": "Version {{version}}",
+    "guestBody": "Reports you check as a guest are kept while you stay signed in on this phone. Sign up to keep them safe.",
+    "switching": "Switching language…"
+  },
+  "legal": {
+    "title": "How we use your data",
+    "intro": "MaweshiAI is a student project (MUET Jamshoro). This is how your information is used:",
+    "items": [
+      "Your name, email and a scrambled (hashed) password are stored to keep you signed in. Guests get a random id instead.",
+      "The 5 photos of each animal are stored in Cloudinary so your report can show them.",
+      "Each check (purpose, optional budget and price, AI results and the report) is stored in our database so it appears in your History.",
+      "Photos and results are sent to our own AI service and, for the written report, breed check and chat, to an AI provider (Anthropic). They are not used to train their models.",
+      "Shared report links show the result and the front photo, but never your name, budget or price.",
+      "You can delete any report from History, or your whole account from Profile, at any time."
+    ],
+    "advice": "MaweshiAI gives advice only. It is not a veterinary diagnosis; always have the animal checked by a vet before buying."
   }
 }

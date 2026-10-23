@@ -13,6 +13,10 @@ const breedKnowledge = require("./breedKnowledge");
 const { templateReport } = require("./report");
 
 const VIEWS = ["front", "back", "left", "right", "teeth"];
+// The disease model was trained on body photos; on healthy dentition close-ups it
+// says foot-and-mouth ~40% of the time (32/80 sampled), so the teeth photo is
+// only used for age.
+const HEALTH_VIEWS = ["front", "back", "left", "right"];
 
 const pct = (c) => `${Math.round((c || 0) * 100)}%`;
 
@@ -116,10 +120,10 @@ const run = async (id, files) => {
       age.age_years != null ? `~${age.age_years} year${age.age_years === 1 ? "" : "s"}${age.uncertain ? " (uncertain)" : ""}` : "Not readable"
     );
 
-    // 4. Health (all five photos; the teeth photo shows mouth lesions)
+    // 4. Health (the four body photos)
     current = "health";
-    await setStep(id, "health", "working", "Mouth, skin and hooves");
-    const health = await ml.health(VIEWS.map((v) => files[v]), VIEWS);
+    await setStep(id, "health", "working", "Skin, legs and hooves");
+    const health = await ml.health(HEALTH_VIEWS.map((v) => files[v]), HEALTH_VIEWS);
     await Evaluation.updateOne({ _id: id }, { $set: { "results.health": health } });
     await setStep(id, "health", "done", describeHealth(health));
 

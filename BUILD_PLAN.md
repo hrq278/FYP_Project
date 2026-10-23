@@ -156,7 +156,7 @@ Tasks:
   - `POST /predict/species` → `{ species: "cow"|"buffalo"|"unknown", confidence }`. **Unknown-animal handling:** return `unknown` when max softmax < threshold (start at 0.80, tune on a small set of non-cattle images: people, goats, cars, walls). Document the chosen threshold and the test set.
   - `POST /predict/breed` (form field `species` = cow|buffalo) → `{ breed, confidence, top3: [...], uncertain }`. Accept several images (front + sides), **average the softmax outputs** across views, keep only the breeds of that species and renormalise, `uncertain: true` below the threshold in `models.yaml`.
   - `POST /predict/age` → `{ age_years, age_band, permanent_incisors_estimate, confidence }` from the teeth image (band and incisor estimate derived from `age_years`).
-  - `POST /predict/health` → `{ condition: "healthy"|"foot-and-mouth"|"lumpy"|"uncertain", confidence, per_image: [...], model_version }`. Run on the body photos (and teeth photo for mouth lesions); report the worst confident finding.
+  - `POST /predict/health` → `{ condition: "healthy"|"foot-and-mouth"|"lumpy"|"uncertain", confidence, per_image: [...], model_version }`. Run on the four body photos only (the teeth close-up gave false FMD on 32 of 80 healthy dentition photos, Module 7); report the worst confident finding.
   - `POST /explain` (optional, do last) → Grad-CAM heatmap PNG (base64) for breed or health.
 - Keep `/predict` working as an alias for species so nothing breaks before Module 2 lands.
 - Tests: `pytest` with 2–3 fixture images per endpoint and one invalid file.
@@ -198,7 +198,7 @@ Tasks:
 - `GET /api/evaluations/:id` — status, steps, results (owner only).
 - `GET /api/evaluations?verdict=&q=&page=` — history list for the user (thumbnail = front image).
 - `DELETE /api/evaluations/:id`.
-- **Pipeline service** (`services/pipeline.js`): species (front image) → stop with `rejected` if `unknown` → breed (front+left+right, species-gated) → **breed verification by the LLM from the left or right photo** (Module 3; skipped with a note if no LLM key) → age (teeth) → health (body + teeth photos) → report (Module 3). Update `steps[]` after each. The breed step's summary shows the final breed (e.g. "Sahiwal").
+- **Pipeline service** (`services/pipeline.js`): species (front image) → stop with `rejected` if `unknown` → breed (front+left+right, species-gated) → **breed verification by the LLM from the left or right photo** (Module 3; skipped with a note if no LLM key) → age (teeth) → health (4 body photos) → report (Module 3). Update `steps[]` after each. The breed step's summary shows the final breed (e.g. "Sahiwal").
 - **Breed reconciliation:** model and LLM agree → keep, confidence up; LLM names a breed outside the 15 classes with good confidence (e.g. Cholistani) → use the LLM breed, mark source "AI vision"; disagree → show the model's top breed with "possibly <LLM breed>", confidence down.
 - **Rule engine** (`services/rules.js`), runs before the LLM and always wins:
   - FMD or Lumpy Skin Disease detected → `not_recommended`, score capped at 25.
@@ -283,13 +283,13 @@ Tasks:
 
 ---
 
-## Module 7 — Mobile: History, Compare, Profile
+## Module 7 — Mobile: History, Compare, Profile ✅ Done 2026-10-24
 
 Tasks:
 - **History** — search (breed/date), filter chips (All / Recommended / Caution / Not Recommended), paginated list with thumbnails and verdict badges, pull to refresh, long-press → multi-select mode, "Compare (2)" button (exactly 2, same purpose; otherwise explain why).
 - **Compare** — A/B cards (photo, badge, score; winner outlined in green), comparison table (breed, age, health, fit for purpose with 3-segment bars), green "Better choice for <purpose>: Animal X" card, "Open Animal X report".
 - **Profile** (not in the design; decision 8) — avatar + name + email, language switch (English / اردو cards as on the Language screen), About MaweshiAI and team, Terms/Privacy links, Logout, Delete account (confirm dialog). Remove `alertsEnabled` (unused).
-- Guest users: history stored locally (AsyncStorage) and a banner "Sign up to save your reports".
+- Guest users: history stored locally (AsyncStorage) and a banner "Sign up to save your reports". *(Built instead: guest reports stay on the server under the guest id and move to the new account on sign-up / log-in, so nothing is lost.)*
 
 **Done when:** history, filters, search, compare and profile all work against real data.
 

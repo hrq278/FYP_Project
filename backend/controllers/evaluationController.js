@@ -8,6 +8,28 @@ const storage = require("../services/storage");
 
 const PAGE_SIZE = 20;
 
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+// "23 Oct", "23 October 2026", "23/10" or "23-10-2026" -> that whole day in the phone's timezone; otherwise null.
+// tzOffset is JavaScript's Date#getTimezoneOffset() from the app (minutes; Pakistan = -300).
+const parseDay = (text, tzOffset = 0) => {
+  let m = text.match(/^(\d{1,2})\s+([a-z]{3})[a-z]*\.?(?:\s+(\d{4}))?$/i);
+  let day;
+  let month;
+  let year;
+  if (m) {
+    [day, month, year] = [Number(m[1]), MONTHS.indexOf(m[2].toLowerCase()), m[3] && Number(m[3])];
+  } else {
+    m = text.match(/^(\d{1,2})[/.-](\d{1,2})(?:[/.-](\d{4}))?$/);
+    if (!m) return null;
+    [day, month, year] = [Number(m[1]), Number(m[2]) - 1, m[3] && Number(m[3])];
+  }
+  if (month < 0 || month > 11 || day < 1 || day > 31) return null;
+  const y = year || new Date().getUTCFullYear();
+  const start = new Date(Date.UTC(y, month, day) + tzOffset * 60 * 1000);
+  return { start, end: new Date(start.getTime() + 24 * 60 * 60 * 1000) };
+};
+
 const ownerFilter = (user) => (user.isGuest ? { guestId: user.guestId } : { userId: user.userId });
 
 const parseAmount = (value) => {
@@ -140,6 +162,9 @@ const listEvaluations = async (req, res) => {
   if (q && String(q).trim()) {
     const rx = new RegExp(String(q).trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
     filter.$or = [{ "results.breed.final.label": rx }, { reportId: rx }, { purpose: rx }];
+    const tz = Number(req.query.tz);
+    const day = parseDay(String(q).trim(), Number.isFinite(tz) && Math.abs(tz) <= 840 ? tz : 0);
+    if (day) filter.$or.push({ createdAt: { $gte: day.start, $lt: day.end } });
   }
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
   const [items, total] = await Promise.all([

@@ -113,10 +113,11 @@ describe("POST /api/evaluations", () => {
     expect(e.budget).toBe(250000);
     expect(e.images.front.url).toMatch(/front\.jpg$/);
     expect(storage.uploadImage).toHaveBeenCalledTimes(5);
-    // breed gets front + left + right, health gets all five in order
+    // breed gets front + left + right, health gets the four body views (not teeth)
     expect(ml.breed.mock.calls[0][0]).toHaveLength(3);
     expect(ml.breed.mock.calls[0][1]).toBe("cow");
-    expect(ml.health.mock.calls[0][1]).toEqual(VIEWS);
+    expect(ml.health.mock.calls[0][1]).toEqual(["front", "back", "left", "right"]);
+    expect(ml.health.mock.calls[0][0]).toHaveLength(4);
   });
 
   test("a non-cattle front photo stops early as rejected", async () => {
@@ -325,4 +326,64 @@ describe("public report page /r/:reportId", () => {
     expect(res.text).not.toContain("<script>alert(1)</script>");
     expect(res.text).toContain("&lt;script&gt;");
   });
+});
+
+describe("Module 7 backend", () => {
+  test("history search understands dates", async () => {
+    const auth = await token();
+    await waitUntilFinished(auth, (await submit(auth)).body.id);
+    const now = new Date();
+    const day = now.getUTCDate();
+    const mon = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][now.getUTCMonth()];
+    for (const q of [`${day} ${mon}`, `${day}/${now.getUTCMonth() + 1}`]) {
+      const res = await request(app).get(`/api/evaluations?q=${encodeURIComponent(q)}`).set("Authorization", `Bearer ${auth}`);
+      expect(res.body.total).toBe(1);
+    }
+    const other = await request(app).get(`/api/evaluations?q=${encodeURIComponent("1 Jan 1999")}`).set("Authorization", `Bearer ${auth}`);
+    expect(other.body.total).toBe(0);
+  });
+
+  test("a guest who signs up keeps their reports", async () => {
+    const guest = (await request(app).post("/api/auth/guest")).body.token;
+    await waitUntilFinished(guest, (await submit(guest)).body.id);
+    const res = await request(app)
+      .post("/api/auth/register")
+      .set("Authorization", `Bearer ${guest}`)
+      .send({ name: "Former Guest", email: "former@example.com", password: "secret123" });
+    expect(res.body.claimedReports).toBe(1);
+    const list = await request(app).get("/api/evaluations").set("Authorization", `Bearer ${res.body.token}`);
+    expect(list.body.total).toBe(1);
+    const asGuest = await request(app).get("/api/evaluations").set("Authorization", `Bearer ${guest}`);
+    expect(asGuest.body.total).toBe(0);
+  });
+
+  test("delete account removes the user, reports and photos", async () => {
+    const auth = await token("leaving@example.com");
+    const { id } = (await submit(auth)).body;
+    await waitUntilFinished(auth, id);
+    const res = await request(app).delete("/api/auth/account").set("Authorization", `Bearer ${auth}`);
+    expect(res.status).toBe(200);
+    expect(res.body.deletedReports).toBe(1);
+    expect(await Evaluation.countDocuments()).toBe(0);
+    expect(storage.deleteImages).toHaveBeenCalledWith(VIEWS.map((v) => `maweshiai/evaluations/${id}/${v}`));
+    const login = await request(app).post("/api/auth/login").send({ email: "leaving@example.com", password: "secret123" });
+    expect(login.status).toBe(401);
+  });
+
+  test("guests can't delete an account", async () => {
+    const guest = (await request(app).post("/api/auth/guest")).body.token;
+    expect((await request(app).delete("/api/auth/account").set("Authorization", `Bearer ${guest}`)).status).toBe(403);
+  });
+});
+
+test("date search uses the phone's timezone", async () => {
+  const auth = await token();
+  const { id } = (await submit(auth)).body;
+  await waitUntilFinished(auth, id);
+  // Pretend it was created at 23 Oct 21:30 UTC = 24 Oct 02:30 in Pakistan (UTC+5)
+  await Evaluation.updateOne({ _id: id }, { $set: { createdAt: new Date(Date.UTC(2026, 9, 23, 21, 30)) } });
+  const q = (s, tz) => request(app).get(`/api/evaluations?q=${encodeURIComponent(s)}${tz != null ? `&tz=${tz}` : ""}`).set("Authorization", `Bearer ${auth}`);
+  expect((await q("24 Oct 2026", -300)).body.total).toBe(1);
+  expect((await q("23 Oct 2026", -300)).body.total).toBe(0);
+  expect((await q("23 Oct 2026")).body.total).toBe(1); // no tz -> UTC day
 });
