@@ -1,21 +1,39 @@
-import json
+import logging
 import os
-import re
-import shutil
-import zipfile
+import threading
+from contextlib import asynccontextmanager
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.environ.setdefault("TFHUB_CACHE_DIR", os.path.join(BASE_DIR, ".tfhub_cache"))
 
-import cv2
-import h5py
-import numpy as np
-import tf_keras
-import tensorflow_hub as hub
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 
-app = FastAPI(title="CattleEval ML Service")
+from maweshi_ml.imaging import InvalidImage, decode_image, to_array
+from maweshi_ml.quality import check_quality
+from maweshi_ml.registry import ModelRegistry, load_config
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+MAX_IMAGES = 6
+
+CONFIG = load_config()
+registry = ModelRegistry(CONFIG)
+# TF/Keras models aren't guaranteed thread-safe; one request per model at a time
+MODEL_NAMES = ("gate", "species", "breed", "age", "health")
+_locks = {name: threading.Lock() for name in MODEL_NAMES}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    only = os.getenv("ML_MODELS")  # e.g. "species,breed" to load a subset while developing
+    await run_in_threadpool(registry.load_all, only.split(",") if only else None)
+    yield
+
+
+app = FastAPI(title="MaweshiAI ML Service", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,149 +43,110 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-MODEL_PATH = os.getenv("MODEL_PATH", "./model/SpecieDetector.keras")
-RESOLVED_MODEL_PATH = MODEL_PATH if os.path.isabs(MODEL_PATH) else os.path.join(BASE_DIR, MODEL_PATH)
-model = None
+
+def _model(name: str):
+    model = registry.get(name)
+    if model is None:
+        detail = registry.status.get(name, {}).get("error", "not loaded")
+        raise HTTPException(status_code=503, detail=f"{name} model unavailable: {detail}")
+    return model
 
 
-def _purge_invalid_tfhub_cache(error: Exception) -> bool:
-    message = str(error)
-    if "contains neither 'saved_model.pb' nor 'saved_model.pbtxt'" not in message:
-        return False
-
-    match = re.search(r"'([^']+)'", message)
-    if not match:
-        return False
-
-    module_path = match.group(1)
-    if not os.path.isdir(module_path):
-        return False
-
-    saved_model_pb = os.path.join(module_path, "saved_model.pb")
-    saved_model_pbtxt = os.path.join(module_path, "saved_model.pbtxt")
-    if os.path.exists(saved_model_pb) or os.path.exists(saved_model_pbtxt):
-        return False
-
-    shutil.rmtree(module_path, ignore_errors=True)
-    return True
-
-
-def _load_keras_archive_fallback(model_archive_path: str):
-    with zipfile.ZipFile(model_archive_path, "r") as archive:
-        config = json.loads(archive.read("config.json"))
-        layers = config.get("config", {}).get("layers", [])
-
-        input_layer = next(layer for layer in layers if layer.get("class_name") == "InputLayer")
-        hub_layer = next(layer for layer in layers if layer.get("class_name") == "KerasLayer")
-        dense_layer = next(layer for layer in layers if layer.get("class_name") == "Dense")
-
-        input_shape = tuple(input_layer.get("config", {}).get("batch_input_shape", [None, 224, 224, 3])[1:])
-        handle = hub_layer.get("config", {}).get("handle")
-        units = int(dense_layer.get("config", {}).get("units", 2))
-        activation = dense_layer.get("config", {}).get("activation", "linear")
-
-        weights_cache_path = os.path.splitext(model_archive_path)[0] + ".weights.h5"
-        with archive.open("model.weights.h5", "r") as source, open(weights_cache_path, "wb") as target:
-            target.write(source.read())
-
-    inputs = tf_keras.Input(shape=input_shape, name=input_layer.get("name") or "input_1")
-    features = hub.KerasLayer(
-        handle,
-        trainable=False,
-        name=hub_layer.get("name") or "keras_layer",
-    )(inputs)
-    outputs = tf_keras.layers.Dense(
-        units,
-        activation=activation,
-        name=dense_layer.get("name") or "dense",
-    )(features)
-
-    restored_model = tf_keras.Model(inputs, outputs, name=config.get("config", {}).get("name", "model"))
-
-    # Build variables before assigning archived values.
-    restored_model(np.zeros((1, *input_shape), dtype=np.float32), training=False)
-
-    with h5py.File(weights_cache_path, "r") as weights_file:
-        hub_group = weights_file["layers/keras_layer/vars"]
-        dense_group = weights_file["layers/dense/vars"]
-
-        hub_values = [
-            np.array(hub_group[key])
-            for key in sorted(hub_group.keys(), key=lambda value: int(value))
-        ]
-        hub_layer_vars = restored_model.get_layer(hub_layer.get("name") or "keras_layer").variables
-
-        if len(hub_values) != len(hub_layer_vars):
-            raise ValueError("Archived hub weights do not match runtime KerasLayer variable count")
-
-        for variable, value in zip(hub_layer_vars, hub_values):
-            variable.assign(value)
-
-        dense_layer_obj = restored_model.get_layer(dense_layer.get("name") or "dense")
-        dense_layer_obj.kernel.assign(np.array(dense_group["0"]))
-        dense_layer_obj.bias.assign(np.array(dense_group["1"]))
-
-    return restored_model
-
-
-@app.on_event("startup")
-def load_model() -> None:
-    global model
+async def _read_image(upload: UploadFile):
+    data = await upload.read()
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail="Image must be 10 MB or smaller")
     try:
-        model = tf_keras.models.load_model(
-            RESOLVED_MODEL_PATH,
-            custom_objects={"KerasLayer": hub.KerasLayer},
-            compile=False,
-        )
-        return
-    except Exception as error:
-        if _purge_invalid_tfhub_cache(error):
-            model = tf_keras.models.load_model(
-                RESOLVED_MODEL_PATH,
-                custom_objects={"KerasLayer": hub.KerasLayer},
-                compile=False,
-            )
-            return
-        if not RESOLVED_MODEL_PATH.lower().endswith(".keras"):
-            raise error
-        try:
-            model = _load_keras_archive_fallback(RESOLVED_MODEL_PATH)
-        except Exception as fallback_error:
-            if _purge_invalid_tfhub_cache(fallback_error):
-                model = _load_keras_archive_fallback(RESOLVED_MODEL_PATH)
-            else:
-                raise
+        return await run_in_threadpool(decode_image, data)
+    except InvalidImage as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+async def _read_images(uploads: list[UploadFile]):
+    if not uploads:
+        raise HTTPException(status_code=400, detail="At least one image is required")
+    if len(uploads) > MAX_IMAGES:
+        raise HTTPException(status_code=400, detail=f"At most {MAX_IMAGES} images per request")
+    return [await _read_image(u) for u in uploads]
+
+
+async def _run(name: str, fn, *args, **kwargs):
+    def locked():
+        with _locks[name]:
+            return fn(*args, **kwargs)
+    return await run_in_threadpool(locked)
 
 
 @app.get("/")
+def root() -> dict:
+    return {"message": "MaweshiAI ML service is running"}
+
+
+@app.get("/health")
 def health() -> dict:
-    return {"message": "CattleEval ML service is running"}
+    loaded = all(registry.status.get(n, {}).get("loaded") for n in MODEL_NAMES)
+    return {"status": "ok" if loaded else "degraded", "models": registry.status}
+
+
+@app.post("/quality")
+async def quality(image: UploadFile = File(...)) -> dict:
+    img = await _read_image(image)
+    return await run_in_threadpool(check_quality, to_array(img), CONFIG["quality"])
+
+
+async def _species(img) -> dict:
+    model = _model("species")
+    gate = registry.get("gate")  # optional: without it there is no not-cattle check
+    gate_result = await _run("gate", gate.predict, img) if gate is not None else None
+    return await _run("species", model.predict, img, gate_result)
+
+
+@app.post("/predict/species")
+async def predict_species(image: UploadFile = File(...)) -> dict:
+    img = await _read_image(image)
+    return await _species(img)
+
+
+@app.post("/predict/breed")
+async def predict_breed(
+    images: list[UploadFile] = File(..., description="Front, left and/or right photos"),
+    species: str | None = Form(None, description="cow or buffalo, from the species step"),
+) -> dict:
+    if species is not None and species not in ("cow", "buffalo"):
+        raise HTTPException(status_code=400, detail="species must be 'cow' or 'buffalo'")
+    model = _model("breed")
+    imgs = await _read_images(images)
+    return await _run("breed", model.predict, imgs, species)
+
+
+@app.post("/predict/age")
+async def predict_age(
+    image: UploadFile = File(..., description="Photo of the lower incisors"),
+    enforce_quality: bool = Query(True, description="false = predict even when the teeth photo fails the gate"),
+) -> dict:
+    model = _model("age")
+    img = await _read_image(image)
+    return await _run("age", model.predict, to_array(img), enforce_quality)
+
+
+@app.post("/predict/health")
+async def predict_health(
+    images: list[UploadFile] = File(..., description="Body photos, optionally the teeth photo"),
+    views: str | None = Form(None, description="Comma-separated view names in the same order, e.g. front,left,right"),
+) -> dict:
+    model = _model("health")
+    imgs = await _read_images(images)
+    names = [v.strip() for v in views.split(",")] if views else None
+    if names is not None and len(names) != len(imgs):
+        raise HTTPException(status_code=400, detail="views must name every image")
+    return await _run("health", model.predict, imgs, names)
 
 
 @app.post("/predict")
-async def predict(bodyImage: UploadFile = File(...)) -> dict:
-    global model
-
-    if model is None:
-        raise HTTPException(status_code=500, detail="Model not loaded")
-
-    file_bytes = await bodyImage.read()
-    np_arr = np.frombuffer(file_bytes, np.uint8)
-    image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-    if image is None:
-        raise HTTPException(status_code=400, detail="Invalid image file")
-
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image = cv2.resize(image, (224, 224))
-    image = image.astype(np.float32) / 255.0
-    image = np.reshape(image, (1, 224, 224, 3))
-
-    prediction = model.predict(image)
-    logits = prediction[0]
-
-    label = int(np.argmax(logits))
-    species = "Cow" if label == 0 else "Buffalo"
-    confidence = round(float(np.max(logits)) * 100, 2)
-
-    return {"species": species, "confidence": confidence}
+async def predict_legacy(bodyImage: UploadFile = File(...)) -> dict:
+    """Original CattleEval endpoint, kept unchanged for the current backend until Module 2."""
+    model = _model("species")
+    img = await _read_image(bodyImage)
+    probs = await _run("species", model.probabilities, img)
+    label = int(probs.argmax())
+    return {"species": "Cow" if label == 0 else "Buffalo", "confidence": round(float(probs.max()) * 100, 2)}

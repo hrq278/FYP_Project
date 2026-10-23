@@ -36,6 +36,7 @@ These override older text in this plan and the UI spec:
 6. **LLM:** Anthropic **Claude Haiku 5.5** (`claude-haiku-5-5`, $0.10 / $0.50 per million input/output tokens, about $0.001 per report) behind the provider interface in Module 3.
 7. **Image storage:** Cloudinary; credentials live in `backend/.env` (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`).
 8. **Profile screen** isn't designed: build it from the same tokens and components (name, email, language switch, about/team, logout, delete account).
+9. **Cattle gate (Module 1 finding):** the species model can't recognise "not cattle" (goats, cats and grass score 0.95+ as cow), so a softmax threshold doesn't work. An ImageNet EfficientNetV2-B0 decides cattle vs not (P(ox) + P(water buffalo) + P(oxcart) ≥ 0.05), and cow vs buffalo is the average of the species model and the gate. Study in `PROGRESS.md`.
 
 ---
 
@@ -132,7 +133,7 @@ Tasks:
 
 ---
 
-## Module 1 — ML service: all four models
+## Module 1 — ML service: all four models ✅ Done 2026-10-23
 
 **Goal:** one ML service that serves every model behind a clean API.
 

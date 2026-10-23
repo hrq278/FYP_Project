@@ -1,0 +1,15 @@
+{
+  "age": {
+    "max_abs_diff": 4.76837158203125e-06,
+    "cpu_ms_batch1": 10.743930000035107,
+    "ok": true
+  },
+  "age_folds": [
+    "fold0"
+  ],
+  "segmenter": {
+    "max_abs_diff": 1.2447708286345005e-07,
+    "cpu_ms_batch1": 46.210340000016004,
+    "ok": true
+  }
+}

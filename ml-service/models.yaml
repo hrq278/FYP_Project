@@ -1,0 +1,97 @@
+# Model registry for the MaweshiAI ML service.
+# Paths are relative to this file. Every value here comes from the model's training/export
+# metadata; see the "source" lines. Do not change class order without retraining.
+
+species:
+  path: model/SpecieDetector.keras
+  version: specie-detector-mobilenetv2-v1
+  framework: tf_keras            # Keras 2 model with a TF Hub MobileNetV2 layer
+  input_size: 224
+  # Training used ImageDataGenerator(rescale=1/255) on RGB
+  scale: 255.0
+  classes: [cow, buffalo]
+  # This two-class model can't recognise "not cattle" (goats, cats and grass score 0.95+ as cow),
+  # so the cattle/not-cattle decision comes from the gate below. Cow vs buffalo = average of this
+  # model and the gate's ox/water-buffalo split. Study: scripts/threshold_study.py, PROGRESS.md.
+  source: original CattleEval ml-service (classes 0=Cow 1=Buffalo)
+
+gate:
+  path: model/gate/efficientnetv2-b0.h5
+  class_index: model/gate/imagenet_class_index.json
+  version: imagenet-efficientnetv2-b0
+  framework: keras
+  input_size: 224
+  cow_classes: [ox]
+  buffalo_classes: [water_buffalo]
+  context_classes: [oxcart]      # cattle pulling a cart; counts towards "is cattle", not towards species
+  # P(ox) + P(water_buffalo) + P(oxcart). Kept low on purpose: rejecting a real animal at the mandi is
+  # worse than letting an odd goat through (the LLM breed check sees the photo later).
+  cattle_threshold: 0.05
+  source: Keras Applications EfficientNetV2B0, ImageNet-1k weights (Apache-2.0)
+
+breed:
+  path: model/cattle_breed.keras
+  labels: model/cattle_breed.labels.json
+  preprocessing: model/cattle_breed.preprocessing.json
+  version: resnet18-thesis-epoch10
+  framework: keras
+  # Which output classes belong to which species (labels.json names)
+  species_classes:
+    buffalo: [jaffarabadi, nili-ravi]
+    cow: [ayrshire, brown-swiss, gir, holstein-friesian, jersey, kankrej, nagori,
+          rathi, red-sindhi, sahiwal, tharparkar, umblachery, vechur]
+  # Display names for the app
+  display_names:
+    ayrshire: Ayrshire
+    brown-swiss: Brown Swiss
+    gir: Gir
+    holstein-friesian: Holstein Friesian
+    jaffarabadi: Jaffarabadi
+    jersey: Jersey
+    kankrej: Kankrej
+    nagori: Nagori
+    nili-ravi: Nili-Ravi
+    rathi: Rathi
+    red-sindhi: Red Sindhi
+    sahiwal: Sahiwal
+    tharparkar: Tharparkar
+    umblachery: Umblachery
+    vechur: Vechur
+  # After species gating and multi-view averaging; below this the breed is "uncertain"
+  uncertain_threshold: 0.50
+  source: F:/FYP/Models/Breed/cattle-breed-classification-dataset/exports/cattle_breed_keras (validation macro-F1 0.71)
+
+age:
+  dir: model/age                 # age.onnx + segmenter.onnx + serve.json from the team's export
+  framework: onnx
+  # Permanent incisor estimate from completed age (standard cattle dentition chart):
+  # milk teeth only until ~2 y, first pair ~2 y, second ~3 y, third ~3.5-4 y, full mouth ~4.5-5 y.
+  incisors_by_age: {1: 0, 2: 2, 3: 4, 4: 6}
+  incisors_full_mouth: 8
+  # The age is flagged "uncertain" when its calibrated 90% interval spans more years than this
+  # (holdout mean width is 4.6 years, median 4)
+  uncertain_max_interval_years: 5
+  source: F:/FYP/Models/Age Detection/outputs/final/serve (holdout MAE 1.21 y, +-1 y accuracy 0.78)
+
+health:
+  path: model/health/efficientnet_b3_best.keras
+  version: efficientnet-b3-baseline-v1
+  framework: keras
+  input_size: 300
+  # Pixel range 0-255: the model rescales internally (do not divide by 255)
+  classes: [foot-and-mouth, healthy, lumpy]
+  uncertain_threshold: 0.60
+  download:
+    repo: xprotocol/EfficientNet-B3-Cattle-Disease
+    revision: 8798052c68dd06fd54ff4c49f019ecab3accabf8
+    file: efficientnet_b3_best.keras
+  source: Hugging Face xprotocol/EfficientNet-B3-Cattle-Disease (Apache-2.0; test accuracy 0.948, macro-F1 0.917)
+
+quality:
+  # Photo checks for the capture screens (OpenCV, no model)
+  blur_long_side: 1024           # resize before measuring, so scores compare across resolutions
+  min_blur: 60.0                 # variance of the Laplacian; lower = blurry
+  min_brightness: 0.18           # mean HSV value 0..1
+  max_brightness: 0.92
+  max_clipped_fraction: 0.35     # share of pixels that are pure black or pure white
+  min_side_px: 320

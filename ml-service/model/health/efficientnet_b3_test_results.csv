@@ -1,0 +1,7 @@
+Metric,Score
+Accuracy,0.9482
+Macro F1,0.9168
+Weighted F1,0.9485
+Macro Precision,0.9009
+Macro Recall,0.9349
+Macro AUC-ROC,0.9894

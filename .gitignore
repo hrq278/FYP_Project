@@ -19,8 +19,11 @@ venv/
 
 # ML service caches and generated files
 ml-service/.tfhub_cache/
-# Rewritten by the .keras fallback loader on every start
+# Extracted by the species .keras fallback loader
 ml-service/model/*.weights.h5
+# 128 MB, over GitHub's limit: fetched by `python scripts/download_models.py`
+ml-service/model/health/*.keras
+*.part
 
 # Environment files (commit .env.example only)
 .env

@@ -1,0 +1,9 @@
+Metric,Value
+Samples evaluated,996.0000
+FMD off-target (excluded),28.0000
+Accuracy,0.9046
+Precision (Lumpy),0.8689
+Recall (Lumpy),0.8281
+F1-Score (Lumpy),0.8480
+AUC-ROC,0.9421
+Avg Precision (AP),0.9132

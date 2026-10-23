@@ -1,0 +1,62 @@
+{
+  "model_version": "cpu_mobilenetv3-fold0-nogit-dirty-20261022",
+  "age": {
+    "onnx": "age.onnx",
+    "backbone": "mobilenetv3_large_100",
+    "image_size": 224,
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "input_variant": "raw_crop",
+    "cache_long_side": 512,
+    "crop_margin": 0.1,
+    "pad_mode": "constant"
+  },
+  "segmenter": {
+    "onnx": "segmenter.onnx",
+    "image_size": 192,
+    "threshold": 0.5,
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "metrics": {
+      "encoder": "mobilenet_v2",
+      "image_size": 192,
+      "val_images": 568,
+      "dice_mean": 0.9566219982832976,
+      "iou_mean": 0.9181274415259043,
+      "iou_median": 0.9300082304431827,
+      "iou_p05": 0.8377855204864014,
+      "confidence_p01": 0.9518393969535828,
+      "confidence_p05": 0.9599391669034958,
+      "latency_ms_mean": 88.73951426056612,
+      "device": "cpu"
+    }
+  },
+  "calibration": {
+    "temperature": 1.1108079651515104,
+    "conformal_threshold": 0.9277438348682656,
+    "alpha": 0.1,
+    "calibrated": true
+  },
+  "quality": {
+    "min_blur": 32.75588159130355,
+    "blur_long_side": 1024,
+    "min_mask_frac": 0.14280961758675234,
+    "min_seg_confidence": 0.9518393969535828
+  }
+}
