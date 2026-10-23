@@ -231,7 +231,7 @@ Tasks:
 
 ---
 
-## Module 4 — Mobile foundation: theme, components, i18n, auth screens
+## Module 4 — Mobile foundation: theme, components, i18n, auth screens ✅ Done 2026-10-23
 
 **Goal:** the design system in code, and the first 6 screens.
 

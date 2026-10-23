@@ -8,15 +8,16 @@ const {
 	logoutUser
 } = require("../controllers/authController");
 const authMiddleware = require("../middleware/authMiddleware");
+const wrap = require("../middleware/asyncHandler");
 const { requireAccount } = authMiddleware;
 
 const router = express.Router();
 
-router.post("/guest", guestLogin);
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.get("/profile", authMiddleware, requireAccount, getProfile);
-router.put("/settings", authMiddleware, requireAccount, updateSettings);
-router.post("/logout", authMiddleware, logoutUser);
+router.post("/guest", wrap(guestLogin));
+router.post("/register", wrap(registerUser));
+router.post("/login", wrap(loginUser));
+router.get("/profile", authMiddleware, requireAccount, wrap(getProfile));
+router.put("/settings", authMiddleware, requireAccount, wrap(updateSettings));
+router.post("/logout", authMiddleware, wrap(logoutUser));
 
 module.exports = router;

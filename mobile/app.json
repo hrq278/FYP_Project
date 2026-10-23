@@ -7,10 +7,27 @@
     "userInterfaceStyle": "light",
     "plugins": [
       "expo-router",
-      "expo-image-picker"
+      "expo-image-picker",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1F5F3A"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "extra": {
+      "supportsRTL": true
+    },
+    "android": {
+      "backgroundColor": "#FAF7F0"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
     }
   }
 }

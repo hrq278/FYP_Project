@@ -4,6 +4,32 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 4 — Mobile foundation: theme, components, i18n, auth screens (2026-10-23)
+
+**Status:** done (verified by rendering on web at phone size; not yet on a physical phone).
+
+### What was done
+- **Design system in code** `mobile/src/theme/`: every token from UI spec §1 (colours incl. verdict and photo-quality colours, type scale, spacing, radii, borders, touch sizes, shadows).
+- **Fonts:** Plus Jakarta Sans (400-800) and Noto Nastaliq Urdu (400-700) via `@expo-google-fonts`; `AppText` switches to Nastaliq with ~1.9x line height in Urdu (`latin` prop keeps names, emails and numbers in the Latin font).
+- **Components** `mobile/src/components/`: `Button` (primary/outline/neutral/dark, icons, loading), `TextField` (label, prefix block, password toggle, error), `SelectCard`, `IconTile`, `Chip`, `PageDots`, `SegmentedToggle`, `Switch`, `Screen`, `BackButton`, `ScreenHeader`, `Card`, `InfoBanner`, `EmptyState`, `Accordion`, `VerdictBadge`, `ScoreRing`, `ConfidenceBar`, `InfoTile`, `Stepper`, `ReportListItem`, bottom nav, and SVG line art (`CattleHeadIcon` logo, `CattleSide` zebu, `PhoneViewfinder`, `TeethIllustration`, `Hills`). Icons from `lucide-react-native`.
+- **i18n** `mobile/src/i18n/`: i18next with `en.json` / `ur.json` for every Module 4 string. Language saved in AsyncStorage, loaded before the first screen renders, synced to `PUT /api/auth/settings` for signed-in users. Switching to/from Urdu calls `I18nManager.forceRTL` and reloads once (`expo-updates`, falling back to `DevSettings.reload`). Arrows and chevrons follow the language (`useDirection`).
+- **Session** `mobile/src/context/SessionContext.js`: token, guest flag, profile, onboarding-seen flag; `signIn`, `signInAsGuest` (`POST /api/auth/guest`), `signOut`, `finishOnboarding`.
+- **Screens** (Expo Router groups): Splash (`app/index.jsx`, animated, routes to Language / Onboarding / Login / Home), `(onboarding)/language`, `(onboarding)/onboarding` (3-step carousel, shown once), `(auth)/login` and `(auth)/register` (email + password per decision 1, Continue as Guest, terms), `(tabs)/home` (greeting, hero card, last 3 reports, guest banner, empty state), `(tabs)/history` and `(tabs)/profile` (basic; full versions in Module 7), `about`. Placeholders for `check/purpose` (Module 5) and `report/[id]` (Module 6).
+- Removed the old CattleEval screens (hero, sidebar, old home/result/settings/profile, background wrapper); they remain in git history.
+- `app.json`: green native splash, `supportsRTL`, web config. New packages: `react-native-svg`, `lucide-react-native`, `i18next`, `react-i18next`, `expo-splash-screen`, `expo-updates`, `expo-status-bar`, both font packages, `react-native-web` + `@expo/metro-runtime` (web rendering for checks).
+- **Backend fix found while testing:** an error inside an async route (e.g. MongoDB not connected) was an unhandled rejection that crashed the whole server. All routes are now wrapped (`middleware/asyncHandler.js`) so errors become 500 responses; 61 backend tests still pass.
+
+### How it was tested
+- Android and web bundles build with no errors (3,239 / 2,864 modules).
+- 17 screens rendered at 390×844 in headless Chrome (Playwright) in English and Urdu and compared with `docs/design/MaweshiAI.pdf`; issues found and fixed: Urdu not applied on deep links, Urdu subtitle font, overlapping radio on Profile, duplicate "Not cattle" in lists, arrow direction and text alignment in RTL.
+- Click-through flow from a fresh install: Splash → Language → Onboarding (3 steps) → Login → Continue as Guest → Home (guest banner) → app restart goes straight to Home. No page errors.
+
+### Open items
+- Run on a real phone with Expo Go (fonts, RTL reload, keyboard). Update `mobile/.env` IP first.
+- On this network DNS TXT lookups were blocked again, so the backend had to be started with the standard `mongodb://` string (see README).
+
+---
+
 ## Module 3 — LLM report, Q&A and compare (2026-10-23)
 
 **Status:** code done and tested with a mocked Anthropic client. **Not yet run against the real API**: needs `LLM_API_KEY` in `backend/.env`, then `node scripts/llm_smoke.js [side-photo.jpg]`.

@@ -1,0 +1,137 @@
+{
+  "app": {
+    "name": "MaweshiAI",
+    "tagline": "Smart advice before you buy",
+    "loading": "Loading…"
+  },
+  "common": {
+    "back": "Back",
+    "continue": "Continue",
+    "next": "Next",
+    "skip": "Skip",
+    "getStarted": "Get started",
+    "seeAll": "See all",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "close": "Close",
+    "or": "or",
+    "comingSoon": "This screen is coming soon."
+  },
+  "language": {
+    "title": "Choose your language",
+    "subtitleUrdu": "اپنی زبان منتخب کریں",
+    "english": "English",
+    "englishHint": "Left to right",
+    "urdu": "اردو",
+    "urduHint": "Urdu · Right to left",
+    "note": "You can change this later in Profile."
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "s1Title": "Take photos",
+    "s1Body": "Take clear photos of the animal in good light. We guide you step by step.",
+    "s1ChipBody": "Body",
+    "s1ChipFace": "Face",
+    "s1ChipTeeth": "Teeth",
+    "s2Title": "AI checks the animal",
+    "s2Body": "Our AI checks the species, breed, age from the teeth, and signs of disease (FMD and Lumpy Skin).",
+    "s2ChipSpecies": "Species",
+    "s2ChipBreed": "Breed",
+    "s2ChipHealth": "Health",
+    "s3Title": "Get your report",
+    "s3Body": "Get clear buy or don't-buy advice for your purpose, with what to check before you pay.",
+    "s3ChipVerdict": "Verdict",
+    "s3ChipPdf": "PDF",
+    "s3ChipShare": "WhatsApp"
+  },
+  "auth": {
+    "loginTitle": "Log in",
+    "loginBody": "Log in with your email to save your reports.",
+    "registerTitle": "Create your account",
+    "registerBody": "Your reports are saved and you can open them on any phone.",
+    "name": "Your name",
+    "namePlaceholder": "e.g. Haroon",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "At least 6 characters",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "login": "Log in",
+    "register": "Create account",
+    "noAccount": "New to MaweshiAI?",
+    "createAccount": "Create an account",
+    "haveAccount": "Already have an account?",
+    "goLogin": "Log in",
+    "guest": "Continue as Guest",
+    "terms": "By continuing you agree to our {{terms}} and {{privacy}}.",
+    "termsLink": "Terms",
+    "privacyLink": "Privacy Policy",
+    "errors": {
+      "required": "Please fill in every field.",
+      "email": "Enter a valid email address.",
+      "password": "Password must be at least 6 characters.",
+      "network": "Can't reach the server. Check your internet and try again.",
+      "failed": "Something went wrong. Please try again."
+    }
+  },
+  "home": {
+    "greeting": "Assalam-o-Alaikum,",
+    "guestName": "Guest",
+    "aiCheck": "AI check",
+    "heroTitle": "Check a New Animal",
+    "heroBody": "Breed, age, health and a buy report",
+    "heroCta": "Start – take photos",
+    "recent": "Recent Reports",
+    "profileA11y": "Open profile",
+    "guestBanner": "You are using guest mode. Sign up to keep your reports safe."
+  },
+  "nav": {
+    "home": "Home",
+    "history": "History",
+    "profile": "Profile"
+  },
+  "purpose": {
+    "milk": "Milk (Dairy)",
+    "breeding": "Breeding",
+    "qurbani": "Qurbani",
+    "meat": "Meat / Fattening",
+    "farm_work": "Farm Work",
+    "other": "Other"
+  },
+  "verdict": {
+    "recommended": "Recommended",
+    "caution": "Caution",
+    "not_recommended": "Not Recommended"
+  },
+  "status": {
+    "processing": "Checking…",
+    "failed": "Failed",
+    "rejected": "Not cattle"
+  },
+  "empty": {
+    "historyTitle": "No reports yet",
+    "historyBody": "Check your first animal at the mandi. Your reports will be saved here.",
+    "checkNew": "Check a New Animal"
+  },
+  "profile": {
+    "title": "Profile",
+    "language": "Language",
+    "about": "About MaweshiAI",
+    "logout": "Log out",
+    "guest": "Guest user",
+    "signUp": "Sign up"
+  },
+  "about": {
+    "title": "About MaweshiAI",
+    "body": "MaweshiAI helps buyers at livestock markets check an animal before paying: species, breed, age from the teeth and signs of disease, with clear advice for their purpose.",
+    "team": "Team",
+    "supervisor": "Supervisor: Dr. Fawad Mangi",
+    "university": "MUET Jamshoro · Final Year Design Project"
+  },
+  "species": {
+    "cow": "Cow",
+    "buffalo": "Buffalo",
+    "unknown": "Not cattle"
+  }
+}

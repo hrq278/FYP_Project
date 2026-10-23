@@ -70,6 +70,10 @@ npx expo start
 
 Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to `http://<your PC's LAN IP>:3000` (find it with `ipconfig`), then scan the QR code with Expo Go.
 
+- Code layout: `mobile/app/` (Expo Router screens: `(onboarding)`, `(auth)`, `(tabs)`, `check/`, `report/`), `mobile/src/theme` (design tokens), `mobile/src/components`, `mobile/src/i18n` (`en.json`, `ur.json`), `mobile/src/context/SessionContext.js`.
+- Switching to Urdu reloads the app once to apply right-to-left layout.
+- `npx expo start --web` renders the app in a browser for quick layout checks.
+
 ## API (current)
 
 | Method | Endpoint | Auth | Notes |

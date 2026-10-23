@@ -1,59 +1,39 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+export const TOKEN_KEY = "token";
+
 const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
   timeout: 20000
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem("token");
+  const token = await AsyncStorage.getItem(TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-export const registerUser = async (payload) => {
-  const response = await api.post("/api/auth/register", payload);
-  return response.data;
+// Turns axios errors into one message key the screens can translate
+export const errorKey = (error) => {
+  if (!error?.response) return "network";
+  return "failed";
 };
 
-export const loginUser = async (payload) => {
-  const response = await api.post("/api/auth/login", payload);
-  return response.data;
-};
+export const registerUser = async (payload) => (await api.post("/api/auth/register", payload)).data;
 
-export const evaluateAnimal = async (imageUri) => {
-  const formData = new FormData();
-  formData.append("bodyImage", {
-    uri: imageUri,
-    name: "body-image.jpg",
-    type: "image/jpeg"
-  });
+export const loginUser = async (payload) => (await api.post("/api/auth/login", payload)).data;
 
-  const response = await api.post("/api/evaluate", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data"
-    }
-  });
+export const guestLogin = async () => (await api.post("/api/auth/guest")).data;
 
-  return response.data;
-};
+export const fetchProfile = async () => (await api.get("/api/auth/profile")).data;
 
-export const fetchProfile = async () => {
-  const response = await api.get("/api/auth/profile");
-  return response.data;
-};
+export const saveSettings = async (payload) => (await api.put("/api/auth/settings", payload)).data;
 
-export const saveSettings = async (payload) => {
-  const response = await api.put("/api/auth/settings", payload);
-  return response.data;
-};
+export const logoutUser = async () => (await api.post("/api/auth/logout")).data;
 
-export const logoutUser = async () => {
-  const response = await api.post("/api/auth/logout");
-  return response.data;
-};
+export const listEvaluations = async (params = {}) => (await api.get("/api/evaluations", { params })).data;
 
 export default api;
