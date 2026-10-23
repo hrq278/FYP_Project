@@ -91,6 +91,7 @@ Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to `http://<your PC's LAN IP>:30
 | DELETE | `/api/evaluations/:id` | Bearer (owner) | Deletes the evaluation and its Cloudinary photos |
 | POST | `/api/evaluations/:id/chat` | Bearer (owner) | `{ message }` → `{ answer, suggestions[3], chat }` (last 20 messages kept). 503 with default suggestions when no LLM key; 409 until the report is ready |
 | POST | `/api/evaluations/compare` | Bearer | `{ ids: [a, b] }` (same purpose, both done) → `{ winnerId, reason, reasonSource, animals[A, B], rows }`; winner by score, reason worded by the LLM when available |
+| GET | `/r/:reportId?k=<shareKey>` | — | Public read-only report page for the PDF's QR code (no budget, price or owner) |
 | POST | `/api/evaluate` | Bearer | Legacy single photo: multipart `bodyImage` → `{ species, confidence, createdAt }` (kept for the current app until Module 5) |
 
 Backend tests: `cd backend && npm test` (Jest + Supertest, in-memory MongoDB; ML service, Cloudinary and the LLM mocked).

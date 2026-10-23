@@ -100,7 +100,8 @@ const createEvaluation = async (req, res) => {
       language,
       quality,
       steps: STEP_KEYS.map((key) => ({ key, status: "waiting" })),
-      reportId: await newReportId()
+      reportId: await newReportId(),
+      shareKey: crypto.randomBytes(12).toString("hex")
     });
 
     // Not awaited: the app polls GET /api/evaluations/:id

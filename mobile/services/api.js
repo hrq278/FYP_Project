@@ -76,3 +76,6 @@ export const createEvaluation = async ({ photos, purpose, budget, sellerPrice, e
 export const getEvaluation = async (id) => (await api.get(`/api/evaluations/${id}`)).data.evaluation;
 
 export default api;
+
+// Q&A about one evaluation. Throws axios errors; a 503 body carries default suggestions.
+export const askQuestion = async (id, message) => (await api.post(`/api/evaluations/${id}/chat`, { message }, { timeout: 60000 })).data;

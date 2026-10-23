@@ -45,6 +45,7 @@ These override older text in this plan and the UI spec:
 1. **Read before writing.** At the start of each module, read the relevant existing files. Extend working code; do not rewrite it from scratch.
 2. **Never invent model metadata.** Class names, class order, input size and preprocessing must come from the training notebooks, dataset folder names, or the team. If you can't find them, **stop and ask**, listing exactly what's missing. Do not guess breed names.
 3. **One module per session.** Finish its acceptance criteria, then update `PROGRESS.md` (what was done, files changed, how to test, open questions) and stop.
+3a. **Keep `FIXES.md` current.** It lists what only the team can do (keys, accounts, devices, data). Remove items once they work; add new ones as they come up.
 4. **Keep secrets out of git.** All keys in `.env` files; commit `.env.example` with placeholder values only.
 5. **Small commits** with clear messages (`feat(ml): add breed endpoint`).
 6. **No fake data in production paths.** Mock data is allowed only behind `USE_MOCKS=true` or in tests/storybook.
@@ -270,7 +271,7 @@ Tasks:
 
 ---
 
-## Module 6 — Mobile: Result, Ask, PDF, Share
+## Module 6 — Mobile: Result, Ask, PDF, Share ✅ Done 2026-10-23
 
 Tasks:
 - **Result screen** (spec §4.12) — header (date · purpose), verdict card (badge + `ScoreRing` + summary), 4 info tiles (Species "Cow"/"Buffalo" with confidence bar; Breed with confidence bar and "AI vision" / "possibly X" note from breed reconciliation; Age "~N years" with "about N permanent teeth"; Health: No disease signs / FMD / Lumpy Skin / Uncertain, each with icon + label), front photo card with "Show AI focus areas" switch (Grad-CAM overlay from `/explain` if Module 1 did it; hide the switch otherwise), accordions (Why this verdict, Risks to consider, Fit for your purpose), disclaimer, sticky bottom bar: Download PDF / **Share on WhatsApp** (primary) / Ask a Question.

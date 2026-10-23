@@ -4,6 +4,32 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 6 — Mobile: Result, Ask, PDF, Share (2026-10-23)
+
+**Status:** done (verified in the browser with real backend + ML service; PDF, WhatsApp and text-to-speech still to try on a phone).
+
+### What was done
+- **Result screen** `app/report/[id]/index.jsx` (spec §4.12): header (date · purpose), verdict card (3dp verdict-colour border, large badge, `ScoreRing`, summary), 2×2 tiles (species + confidence, breed + confidence + "possibly X" / "identified by AI", age + permanent-teeth estimate + "not certain", health + note), front photo (or "Photo not stored"), accordions (Why this verdict – open, Risks, Fit for your purpose, Check before you pay), disclaimer with report id and whether the text was written by AI or from rules, sticky bar: Download PDF · **Share on WhatsApp** · Ask a Question. Handles loading, still processing (keeps polling), rejected, failed, not found.
+- **PDF** `src/report/pdf.js` (spec §6): A4 HTML (logo, report id, date, purpose, prepared for, QR code, front photo, verdict box, summary table with AI confidence, reasons and risks boxes, disclaimer, footer) → `expo-print` → share sheet. Urdu PDFs embed Noto Nastaliq Urdu as base64 `@font-face` and are right-to-left. QR via `qrcode-generator` (pure JS). On web the report opens in its own window to print.
+- **Share** `src/report/share.js`: WhatsApp with summary + link (`whatsapp://send`), falling back to the share sheet with the PDF; `wa.me` on web.
+- **Ask screen** `app/report/[id]/ask.jsx` (spec §4.13): linked report card, chat bubbles from the stored history, 3 suggested questions (tap sends), input + Send, **Listen** with `expo-speech` (`ur-PK` / `en-US`); clear notice and default suggestions when the AI assistant isn't available (no key yet). Voice input ("Speak") left out as allowed by the plan.
+- **Backend**: public read-only report page `GET /r/:reportId?k=<shareKey>` for the QR code. Report ids are guessable (date + 4 digits), so each evaluation now gets a random 24-hex `shareKey` and the page needs both; it leaves out budget, seller's price and owner, escapes all text and sets `noindex`.
+- ML service: species confidence capped at 0.99 (it showed "100%").
+- New packages: `expo-print`, `expo-sharing`, `expo-speech`, `expo-file-system`, `expo-asset`, `qrcode-generator`.
+
+### How it was tested
+- Backend: **63 tests** pass (2 new: share key required, budget/price not exposed, HTML escaped). ML: 48 pass.
+- Created one English and one Urdu evaluation through the API, then rendered with Playwright: Result (top / middle / bottom) in English and Urdu, the PDF HTML at A4 in both languages (Urdu in Nastaliq, mirrored), Ask screen before and after tapping a suggestion (503 notice without key), and the public page (200 with key, 404 without).
+- Fixed during testing: Urdu Ask screen wider than the screen (input needed `minWidth: 0` on web), species "100%".
+- Android bundle builds; no page errors.
+
+### Open items
+- Try Download PDF, WhatsApp and Listen on a real phone (FIXES.md item 5).
+- QR / WhatsApp links work only on the local network until deployment (FIXES.md item 6, Module 10).
+- "Show AI focus areas" heatmap stays hidden (no `/explain` yet).
+
+---
+
 ## Module 5 — Mobile: analysis flow (2026-10-23)
 
 **Status:** done (verified end to end in the browser with real backend + ML service; not yet on a physical phone).

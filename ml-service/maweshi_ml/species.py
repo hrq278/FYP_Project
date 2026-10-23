@@ -159,7 +159,8 @@ class SpeciesModel:
         margin = (p_buffalo - th) / (1 - th) if species == "buffalo" else (th - p_buffalo) / th
         return {
             "species": species,
-            "confidence": round(0.5 + 0.5 * min(1.0, margin), 4),
+            # Capped below 1: a model score is never certainty
+            "confidence": round(min(0.99, 0.5 + 0.5 * min(1.0, margin)), 4),
             "buffalo_score": round(p_buffalo, 4),
             **result,
         }

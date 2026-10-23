@@ -296,3 +296,33 @@ describe("legacy /api/evaluate", () => {
     expect(list.body.total).toBe(0);
   });
 });
+
+describe("public report page /r/:reportId", () => {
+  test("needs the share key and hides budget and price", async () => {
+    const auth = await token();
+    const { id, reportId } = (await submit(auth, { budget: "2,50,000", sellerPrice: "9,99,999" })).body;
+    const e = await waitUntilFinished(auth, id);
+    expect(e.shareKey).toMatch(/^[0-9a-f]{24}$/);
+
+    const noKey = await request(app).get(`/r/${reportId}`);
+    expect(noKey.status).toBe(404);
+    const wrongKey = await request(app).get(`/r/${reportId}?k=deadbeef`);
+    expect(wrongKey.status).toBe(404);
+
+    const ok = await request(app).get(`/r/${reportId}?k=${e.shareKey}`);
+    expect(ok.status).toBe(200);
+    expect(ok.text).toContain(reportId);
+    expect(ok.text).toContain(e.report.summary.replace(/'/g, "&#39;"));
+    expect(ok.text).not.toMatch(/9,99,999|999999|250000/);
+  });
+
+  test("escapes text from the report", async () => {
+    const auth = await token();
+    const { id, reportId } = (await submit(auth)).body;
+    const e = await waitUntilFinished(auth, id);
+    await Evaluation.updateOne({ _id: id }, { $set: { "report.summary": "<script>alert(1)</script>" } });
+    const res = await request(app).get(`/r/${reportId}?k=${e.shareKey}`);
+    expect(res.text).not.toContain("<script>alert(1)</script>");
+    expect(res.text).toContain("&lt;script&gt;");
+  });
+});

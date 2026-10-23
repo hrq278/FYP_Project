@@ -69,6 +69,8 @@ const evaluationSchema = new mongoose.Schema(
       promptVersion: String
     },
     reportId: { type: String, unique: true, sparse: true },
+    // Random key for the public read-only page (/r/:reportId?k=...); report ids alone are guessable
+    shareKey: { type: String, index: true },
 
     // Q&A about this animal (last 20 messages kept)
     chat: [

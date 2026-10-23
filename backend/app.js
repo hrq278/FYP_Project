@@ -3,6 +3,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const evaluateRoutes = require("./routes/evaluateRoutes");
 const evaluationRoutes = require("./routes/evaluationRoutes");
+const publicRoutes = require("./routes/publicRoutes");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/evaluate", evaluateRoutes);
 app.use("/api/evaluations", evaluationRoutes);
+app.use("/r", publicRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;
