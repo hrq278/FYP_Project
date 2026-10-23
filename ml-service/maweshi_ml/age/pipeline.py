@@ -46,9 +46,14 @@ class AgeModel:
         with open(os.path.join(self.dir, "serve.json"), encoding="utf-8") as f:
             self.spec = json.load(f)
         providers = ["CPUExecutionProvider"]
-        self.age = ort.InferenceSession(os.path.join(self.dir, self.spec["age"]["onnx"]), providers=providers)
+        # The 5-fold ensemble graph (if configured) replaces the single-fold age.onnx from serve.json
+        age_file = cfg.get("onnx") or self.spec["age"]["onnx"]
+        self.age = ort.InferenceSession(os.path.join(self.dir, age_file), providers=providers)
         self.seg = ort.InferenceSession(os.path.join(self.dir, self.spec["segmenter"]["onnx"]), providers=providers)
-        self.version = self.spec["model_version"]
+        self.version = cfg.get("version") or self.spec["model_version"]
+        # Test-time views as in the team's eval: (horizontal flip, centre zoom) pairs, probabilities averaged
+        flips = (False, True) if cfg.get("tta_flip") else (False,)
+        self.views = [(f, float(s)) for s in cfg.get("tta_scales", [1.0]) for f in flips]
 
     @staticmethod
     def _normalise(img: np.ndarray, mean, std) -> np.ndarray:
@@ -71,13 +76,25 @@ class AgeModel:
         chosen = v.get(a["input_variant"], v["raw_full"])
         return cv2.resize(chosen, (a["image_size"], a["image_size"]), interpolation=cv2.INTER_AREA)
 
+    @staticmethod
+    def _view(x: np.ndarray, flip: bool, scale: float) -> np.ndarray:
+        """Same as the age project's apply_view: zoom s > 1 centre-crops 1/s and resizes back (bilinear,
+        half-pixel centres like torch's align_corners=False), then optional horizontal flip. x is (1, C, H, W)."""
+        if scale != 1.0:
+            h, w = x.shape[-2:]
+            ch, cw = round(h / scale), round(w / scale)
+            top, left = (h - ch) // 2, (w - cw) // 2
+            crop = x[0, :, top: top + ch, left: left + cw].transpose(1, 2, 0)
+            x = cv2.resize(crop, (w, h), interpolation=cv2.INTER_LINEAR).transpose(2, 0, 1)[None]
+        return np.ascontiguousarray(x[..., ::-1]) if flip else x
+
     def incisors_estimate(self, years: int) -> int:
         table = {int(k): v for k, v in self.cfg["incisors_by_age"].items()}
         return table.get(years, self.cfg["incisors_full_mouth"])
 
     def predict(self, rgb: np.ndarray, enforce_quality: bool = True) -> dict:
         """``rgb`` is RGB uint8. With a failed quality gate (and enforce_quality) the age fields are None."""
-        q = self.spec["quality"]
+        q = {**self.spec["quality"], **self.cfg.get("quality_overrides", {})}
         reasons: list[str] = []
         diag: dict[str, float] = {"blur": blur_score(rgb, q["blur_long_side"])}
         if diag["blur"] < q["min_blur"]:
@@ -106,7 +123,9 @@ class AgeModel:
 
         use_mask = mask if (mask > 0).any() else None
         a = self.spec["age"]
-        probs, _reg = self.age.run(None, {"image": self._normalise(self.model_input(rgb, use_mask), a["mean"], a["std"])})
+        x = self._normalise(self.model_input(rgb, use_mask), a["mean"], a["std"])
+        batch = np.concatenate([self._view(x, flip, scale) for flip, scale in self.views])
+        probs = self.age.run(None, {"image": batch})[0].mean(axis=0, keepdims=True)
         c = self.spec["calibration"]
         p = apply_temperature(probs.astype(np.float64), c["temperature"])[0]
         lo, hi = predict_intervals(p[None], c["conformal_threshold"])[0]

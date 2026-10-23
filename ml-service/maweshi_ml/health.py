@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 
 import keras
+import tensorflow as tf
 import numpy as np
 from PIL import Image
 
@@ -49,6 +50,10 @@ class HealthModel:
             compile=False,
             custom_objects={"EfficientNetPreprocess": EfficientNetPreprocess, "FocalLoss": FocalLoss},
         )
+        # Compiled once per input shape: eager Keras calls are 5-10x slower on CPU.
+        # The functional model expects its inputs as a dict keyed by the input layer's name.
+        name = self.model.inputs[0].name
+        self._infer = tf.function(lambda x: self.model({name: x}, training=False), reduce_retracing=True)
 
     def preprocess(self, image: Image.Image) -> np.ndarray:
         size = self.cfg["input_size"]
@@ -58,8 +63,11 @@ class HealthModel:
     def predict(self, images: list[Image.Image], views: list[str] | None = None) -> dict:
         views = views or [f"image_{i + 1}" for i in range(len(images))]
         batch = np.stack([self.preprocess(im) for im in images])
-        # The functional model expects its inputs as a dict keyed by the input layer's name
-        probs = np.asarray(self.model({self.model.inputs[0].name: batch}, training=False))
+        if self.cfg.get("tta_flip"):  # each photo and its mirror image, probabilities averaged
+            batch = np.concatenate([batch, batch[:, :, ::-1]])
+        probs = self._infer(tf.constant(batch)).numpy()
+        if self.cfg.get("tta_flip"):
+            probs = (probs[: len(images)] + probs[len(images):]) / 2
         threshold = self.cfg["uncertain_threshold"]
 
         per_image = []

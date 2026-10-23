@@ -11,6 +11,7 @@ import json
 import os
 
 import keras
+import tensorflow as tf
 import numpy as np
 from PIL import Image
 
@@ -27,11 +28,14 @@ class CattleGate:
         self.names = {i: n for n, i in index.items()}
         # EfficientNetV2 includes its own rescaling: feed RGB 0-255
         self.model = keras.applications.EfficientNetV2B0(weights=os.path.join(base_dir, cfg["path"]))
+        # Compiled once per input shape: eager Keras calls are 5-10x slower on CPU
+        self._infer = tf.function(lambda x: self.model(x, training=False), reduce_retracing=True)
 
     def predict(self, image: Image.Image) -> dict:
         size = self.cfg["input_size"]
-        x = np.asarray(image.resize((size, size), Image.Resampling.BILINEAR), dtype=np.float32)[None]
-        p = np.asarray(self.model(x, training=False))[0]
+        x = np.asarray(image.resize((size, size), Image.Resampling.BILINEAR), dtype=np.float32)
+        batch = np.stack([x, x[:, ::-1]]) if self.cfg.get("tta_flip") else x[None]
+        p = self._infer(tf.constant(batch)).numpy().mean(axis=0)  # photo and mirror image averaged
         cow, buffalo = float(p[self.cow_idx].sum()), float(p[self.buffalo_idx].sum())
         score = cow + buffalo + float(p[self.context_idx].sum())
         return {

@@ -11,6 +11,7 @@ import zipfile
 import cv2
 import h5py
 import numpy as np
+import tensorflow as tf
 import tensorflow_hub as hub
 import tf_keras
 from PIL import Image
@@ -120,6 +121,8 @@ class SpeciesModel:
         self.version = cfg["version"]
         self.classes = cfg["classes"]
         self.model = _load_model(os.path.join(base_dir, cfg["path"]))
+        # Compiled once: the TF Hub layer is slow in eager mode (~800 ms per call)
+        self._infer = tf.function(lambda x: self.model(x, training=False), reduce_retracing=True)
 
     def preprocess(self, image: Image.Image) -> np.ndarray:
         size = self.cfg["input_size"]
@@ -127,7 +130,12 @@ class SpeciesModel:
         return (rgb.astype(np.float32) / self.cfg["scale"])[None]
 
     def probabilities(self, image: Image.Image) -> np.ndarray:
-        return self.model.predict(self.preprocess(image), verbose=0)[0]
+        x = self.preprocess(image)
+        # Always a batch of 2: the TF Hub layer takes ~720 ms for one image but ~30 ms for two
+        flip = bool(self.cfg.get("tta_flip"))
+        batch = np.concatenate([x, x[:, :, ::-1] if flip else x])
+        probs = self._infer(tf.constant(batch)).numpy()
+        return probs.mean(axis=0) if flip else probs[0]
 
     def predict(self, image: Image.Image, gate: dict | None = None) -> dict:
         """``gate`` is the CattleGate result for the same photo. Without it there is no not-cattle check."""
@@ -141,12 +149,17 @@ class SpeciesModel:
         if gate is not None and not gate["is_cattle"]:
             return {"species": "unknown", "confidence": round(1.0 - gate["cattle_score"], 4), **result}
 
-        # Average the two cow/buffalo opinions when the gate has one
+        # Weighted cow/buffalo opinion; models.yaml gives the weights and the cut-off (tuned for balanced accuracy)
         share = gate["buffalo_share"] if gate else None
-        p_buffalo = (own_buffalo + share) / 2 if share is not None else own_buffalo
-        species = "buffalo" if p_buffalo >= 0.5 else "cow"
+        w = self.cfg["species_model_weight"] if share is not None else 1.0
+        th = self.cfg["buffalo_threshold"] if share is not None else 0.5
+        p_buffalo = w * own_buffalo + (1 - w) * (share if share is not None else 0.0)
+        species = "buffalo" if p_buffalo >= th else "cow"
+        # Confidence: how far the score sits from the cut-off, scaled to 0.5-1.0
+        margin = (p_buffalo - th) / (1 - th) if species == "buffalo" else (th - p_buffalo) / th
         return {
             "species": species,
-            "confidence": round(p_buffalo if species == "buffalo" else 1.0 - p_buffalo, 4),
+            "confidence": round(0.5 + 0.5 * min(1.0, margin), 4),
+            "buffalo_score": round(p_buffalo, 4),
             **result,
         }

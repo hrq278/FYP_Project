@@ -11,8 +11,13 @@ species:
   scale: 255.0
   classes: [cow, buffalo]
   # This two-class model can't recognise "not cattle" (goats, cats and grass score 0.95+ as cow),
-  # so the cattle/not-cattle decision comes from the gate below. Cow vs buffalo = average of this
-  # model and the gate's ox/water-buffalo split. Study: scripts/threshold_study.py, PROGRESS.md.
+  # so the cattle/not-cattle decision comes from the gate below. Cow vs buffalo:
+  #   p_buffalo = species_model_weight * this model + (1 - weight) * gate's water-buffalo share; buffalo if >= threshold
+  # On 968 labelled photos (185 buffalo) this model alone scored 69.5%; the best balanced accuracy (0.908:
+  # buffalo 91.4%, cow 90.3%, same on both sources) came from the gate split alone at 0.10. Averaging (0.5/0.5)
+  # gave buffalo recall 65.9%. So the weight is 0: the model's output is still returned, it doesn't decide.
+  species_model_weight: 0.0
+  buffalo_threshold: 0.10
   source: original CattleEval ml-service (classes 0=Cow 1=Buffalo)
 
 gate:
@@ -24,9 +29,12 @@ gate:
   cow_classes: [ox]
   buffalo_classes: [water_buffalo]
   context_classes: [oxcart]      # cattle pulling a cart; counts towards "is cattle", not towards species
-  # P(ox) + P(water_buffalo) + P(oxcart). Kept low on purpose: rejecting a real animal at the mandi is
-  # worse than letting an odd goat through (the LLM breed check sees the photo later).
-  cattle_threshold: 0.05
+  # P(ox) + P(water_buffalo) + P(oxcart), photo and mirror image averaged. Kept low on purpose: rejecting a
+  # real animal at the mandi is worse than letting an odd goat through (the LLM breed check sees it later).
+  # 968 cattle + 35 not-cattle: no flip @0.05 -> 5.8% cattle rejected / 5.7% not-cattle accepted;
+  # flip @0.02 -> 3.0% / 5.7%. Top-5 rules let bison, goats and pigs through, so not used.
+  tta_flip: true
+  cattle_threshold: 0.02
   source: Keras Applications EfficientNetV2B0, ImageNet-1k weights (Apache-2.0)
 
 breed:
@@ -57,12 +65,22 @@ breed:
     tharparkar: Tharparkar
     umblachery: Umblachery
     vechur: Vechur
+  # Test-time views (scripts/eval_breed.py): center crop + whole frame + both mirrored. Dairy-breed set
+  # (160 photos): top-1 0.794 -> 0.887 and a more useful uncertain flag (8% known vs 35% unknown breeds).
+  # Independent SynthAIzer set (~15 animals): 0.273 -> 0.263 (one photo). The model is weak on new photos.
+  tta: [center, center_flip, full, full_flip]
   # After species gating and multi-view averaging; below this the breed is "uncertain"
   uncertain_threshold: 0.50
   source: F:/FYP/Models/Breed/cattle-breed-classification-dataset/exports/cattle_breed_keras (validation macro-F1 0.71)
 
 age:
-  dir: model/age                 # age.onnx + segmenter.onnx + serve.json from the team's export
+  dir: model/age                 # segmenter.onnx + serve.json from the team's export
+  # 5-fold ensemble of the cpu_mobilenetv3 runs, exported with the age project's own AgeExport
+  # (holdout, team's predictions: fold0 alone MAE 1.26 / +-1 0.754; ensemble + TTA MAE 1.11 / +-1 0.790)
+  onnx: age_ensemble.onnx
+  version: cpu_mobilenetv3-5fold-ensemble-tta-20261023
+  tta_flip: true
+  tta_scales: [1.0, 1.15]
   framework: onnx
   # Permanent incisor estimate from completed age (standard cattle dentition chart):
   # milk teeth only until ~2 y, first pair ~2 y, second ~3 y, third ~3.5-4 y, full mouth ~4.5-5 y.
@@ -71,6 +89,11 @@ age:
   # The age is flagged "uncertain" when its calibrated 90% interval spans more years than this
   # (holdout mean width is 4.6 years, median 4)
   uncertain_max_interval_years: 5
+  # serve.json's min_blur (32.8) flagged 132/449 holdout teeth photos as blurry although they were as accurate
+  # as the rest (MAE 1.14 vs 1.23). 16 = 5th percentile of the holdout's blur, so only really blurry photos
+  # are sent back. scripts/eval_age.py
+  quality_overrides:
+    min_blur: 16.0
   source: F:/FYP/Models/Age Detection/outputs/final/serve (holdout MAE 1.21 y, +-1 y accuracy 0.78)
 
 health:
@@ -81,6 +104,9 @@ health:
   # Pixel range 0-255: the model rescales internally (do not divide by 255)
   classes: [foot-and-mouth, healthy, lumpy]
   uncertain_threshold: 0.60
+  # Each photo is also scored mirrored and the two averaged (scripts/eval_health.py: equal or slightly better
+  # on every external set, e.g. lumpy-skin set 0.915 -> 0.936)
+  tta_flip: true
   download:
     repo: xprotocol/EfficientNet-B3-Cattle-Disease
     revision: 8798052c68dd06fd54ff4c49f019ecab3accabf8

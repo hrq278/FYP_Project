@@ -8,8 +8,9 @@ import pytest
 from conftest import AGE_PROJECT, BREED_EXPORT, fixture_path, teeth_photo
 from PIL import Image
 
+from maweshi_ml.age.pipeline import AgeModel
 from maweshi_ml.imaging import decode_image, to_array
-from maweshi_ml.registry import ModelRegistry, load_config
+from maweshi_ml.registry import BASE_DIR, ModelRegistry, load_config
 
 
 @pytest.fixture(scope="module")
@@ -32,7 +33,11 @@ def test_age_matches_team_pipeline(registry):
     with open(path, "rb") as f:
         rgb = to_array(decode_image(f.read()))
     expected = theirs.predict(rgb)
-    ours = registry.get("age").predict(rgb)
+    # Same configuration as the team's export (fold 0, no test-time views, their quality thresholds); the
+    # served model is the 5-fold ensemble + TTA, checked in test_served_age_model_is_the_ensemble
+    single = {k: v for k, v in load_config()["age"].items() if k != "quality_overrides"}
+    single.update({"onnx": "age.onnx", "tta_flip": False, "tta_scales": [1.0]})
+    ours = AgeModel(single, BASE_DIR).predict(rgb)
     assert ours["age_years"] == expected.age_class
     assert ours["interval_90"] == expected.interval_90
     assert abs(ours["confidence"] - expected.confidence) < 1e-3
@@ -52,3 +57,9 @@ def test_breed_preprocessing_matches_export(registry):
     expected = preprocess_image(path, model.pre)[0]
     ours = model.preprocess(Image.open(path).convert("RGB"))
     np.testing.assert_allclose(ours, expected, atol=1e-6)
+
+
+def test_served_age_model_is_the_ensemble(registry):
+    model = registry.get("age")
+    assert model.version.startswith("cpu_mobilenetv3-5fold-ensemble")
+    assert len(model.views) == 4  # (no flip, flip) x (zoom 1.0, 1.15)
