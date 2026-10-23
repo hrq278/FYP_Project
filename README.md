@@ -85,9 +85,13 @@ Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to `http://<your PC's LAN IP>:30
 | GET | `/api/evaluations/:id` | Bearer (owner) | `{ evaluation }`: `status` (processing/done/failed/rejected), `steps[]`, `results`, `verdict`, `score`, `scoreBreakdown`, `report`, `images` (Cloudinary URLs). Poll every 1.5 s while processing |
 | GET | `/api/evaluations?verdict=&q=&page=` | Bearer | History, newest first, 20 per page: `{ items: [{ id, reportId, status, purpose, verdict, score, species, breed, thumbnail, createdAt }], total }` |
 | DELETE | `/api/evaluations/:id` | Bearer (owner) | Deletes the evaluation and its Cloudinary photos |
+| POST | `/api/evaluations/:id/chat` | Bearer (owner) | `{ message }` → `{ answer, suggestions[3], chat }` (last 20 messages kept). 503 with default suggestions when no LLM key; 409 until the report is ready |
+| POST | `/api/evaluations/compare` | Bearer | `{ ids: [a, b] }` (same purpose, both done) → `{ winnerId, reason, reasonSource, animals[A, B], rows }`; winner by score, reason worded by the LLM when available |
 | POST | `/api/evaluate` | Bearer | Legacy single photo: multipart `bodyImage` → `{ species, confidence, createdAt }` (kept for the current app until Module 5) |
 
-Backend tests: `cd backend && npm test` (Jest + Supertest, in-memory MongoDB; ML service and Cloudinary mocked).
+Backend tests: `cd backend && npm test` (Jest + Supertest, in-memory MongoDB; ML service, Cloudinary and the LLM mocked).
+
+**LLM (reports, breed check, chat, compare):** set `LLM_API_KEY` in `backend/.env` (Claude Haiku 5.5 by default, about $0.001 per report). Check it with `node scripts/llm_smoke.js [side-photo.jpg]`. Without a key everything still works with rule-based reports in English and Urdu; chat returns 503. Prompts: [docs/PROMPTS.md](docs/PROMPTS.md); breed facts and sources: [docs/breeds_sources.md](docs/breeds_sources.md).
 
 ### ML service (port 8000)
 

@@ -8,6 +8,7 @@ const {
   listEvaluations,
   deleteEvaluation
 } = require("../controllers/evaluationController");
+const { chat, compare } = require("../controllers/assistantController");
 
 const router = express.Router();
 
@@ -16,8 +17,10 @@ const photoFields = ["front", "back", "left", "right", "teeth"].map((name) => ({
 router.use(authMiddleware);
 router.post("/quality", upload.single("image"), checkQuality);
 router.post("/", upload.fields(photoFields), createEvaluation);
+router.post("/compare", compare);
 router.get("/", listEvaluations);
 router.get("/:id", getEvaluation);
 router.delete("/:id", deleteEvaluation);
+router.post("/:id/chat", chat);
 
 module.exports = router;

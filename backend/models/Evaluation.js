@@ -70,6 +70,20 @@ const evaluationSchema = new mongoose.Schema(
     },
     reportId: { type: String, unique: true, sparse: true },
 
+    // Q&A about this animal (last 20 messages kept)
+    chat: [
+      new mongoose.Schema(
+        {
+          role: { type: String, enum: ["user", "assistant"], required: true },
+          content: { type: String, required: true },
+          suggestions: [String],
+          promptVersion: String,
+          createdAt: { type: Date, default: Date.now }
+        },
+        { _id: false }
+      )
+    ],
+
     // Created by the original single-photo /api/evaluate endpoint
     legacy: { type: Boolean, default: false }
   },

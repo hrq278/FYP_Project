@@ -1,0 +1,31 @@
+# LLM prompts
+
+Model: Anthropic **Claude Haiku 5.5** (`claude-haiku-5-5`), effort `low`, structured outputs (JSON schema from zod, validated again in code). Code: `backend/services/llm.js`. Every stored result records its prompt version (`report.promptVersion`, `results.breedVerification.promptVersion`, `chat[].promptVersion`).
+
+Design rules, applied in every prompt:
+- The rule engine (`services/rules.js`) decides the verdict and score; the LLM only explains them and must never contradict the verdict.
+- The LLM may only use facts passed in the request: model results with confidences, the rule engine's reasons and risks, and the breed's entry in `data/breeds.json` (sources in `docs/breeds_sources.md`).
+- Low confidence (< 0.6) or "uncertain" results must be stated as uncertain, with a check the buyer can do in person.
+- Invalid output is retried once; then the app uses the rule-based template report (`services/report.js`, English and Urdu).
+- Language: `en` → simple English; `ur` → simple Urdu script, numbers, breed names and PKR in digits.
+
+## breed-check-v1
+
+Input: one side photo (base64) + species + the image classifier's top 3.
+Output: `{ breed, confidence (0-1), inKnownClasses, reasoning }`. Must answer "crossbred" or "unknown" instead of guessing; confidence must be conservative (coat colour alone is weak evidence). `inKnownClasses` is re-checked in code against the 15 model classes, and confidence is clamped to 0-1.
+Use: `services/breed.js` reconciles it with the model (agree → confidence up; confident breed the model can't name → LLM breed; disagree → "possibly X", confidence down).
+
+## report-v1
+
+Input: buying purpose, budget, seller's price, buyer experience, species/breed/age/health results with confidences, breed facts (or "no entry: do not state breed facts"), and the decision (verdict, score, purpose-fit level, rule reasons, rule risks).
+Output: `{ summary, reasons[2-5], risks[], purposeFit, tips[3-4] }`. Risks must include every rule risk; tips must include watching one milking (dairy), the vaccination record, and checking udder, teats and hooves where relevant. `purposeFitLevel`, `source: "llm"` and `promptVersion` are added in code.
+
+## chat-v1
+
+Input: the evaluation's report context (purpose, budget, price, verdict, score, results, report, breed facts) + the last 10 messages + the question.
+Output: `{ answer (< 90 words), suggestions[3] }`. Must not invent this animal's milk yield, price or medical history, must not diagnose (refer to a vet), must not contradict the verdict, and ends with one concrete thing to check.
+
+## compare-v1
+
+Input: the two animals' summaries (score, verdict, breed, age, health, purpose fit). The winner is chosen in code (higher score; ties → better health).
+Output: `{ reason }`: one or two sentences explaining why the winner is better for the purpose; never argues for the other animal. Without the LLM a template sentence is used.

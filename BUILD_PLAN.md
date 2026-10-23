@@ -213,7 +213,7 @@ Tasks:
 
 ---
 
-## Module 3 — LLM report, Q&A and compare
+## Module 3 — LLM report, Q&A and compare ✅ Code done 2026-10-23 (real-API check pending LLM_API_KEY)
 
 **Goal:** trustworthy, structured, bilingual advice.
 

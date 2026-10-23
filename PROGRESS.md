@@ -4,6 +4,30 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 3 — LLM report, Q&A and compare (2026-10-23)
+
+**Status:** code done and tested with a mocked Anthropic client. **Not yet run against the real API**: needs `LLM_API_KEY` in `backend/.env`, then `node scripts/llm_smoke.js [side-photo.jpg]`.
+
+### What was done
+- `services/llm.js`: Anthropic provider (official `@anthropic-ai/sdk`, `messages.parse` with zod structured outputs, model `claude-haiku-5-5`, effort low). Output re-validated with zod; invalid output retried once; refusals and API errors go straight to the fallback. Functions: `verifyBreed` (side photo, base64), `generateReport`, `answerQuestion`, `explainComparison`. Prompt versions `breed-check-v1`, `report-v1`, `chat-v1`, `compare-v1` stored with each result.
+- **Breed knowledge base** `backend/data/breeds.json`: 23 breeds (the 15 model classes + Cholistani, Dhanni, Lohani, Achai, Dajal, Bhagnari, Kundi, Murrah) with origin, primary use, milk yield, weight, heat tolerance, notes and per-purpose suitability; 23 cited sources and the suitability method in `docs/breeds_sources.md`. Missing figures say "not found in the sources used". The rule engine now scores purpose fit from it (it was "unknown" for every breed in Module 2).
+- Report: explains the rule engine's verdict (never changes it), uses only given facts and the breed's KB entry, includes every rule risk, English or Urdu by `language`. Template fallback now also in **Urdu** (built from rule flags).
+- Breed check runs in the pipeline on the left photo and is reconciled with the model (Module 2 `breed.js`).
+- `POST /api/evaluations/:id/chat`: grounded Q&A, 3 suggested follow-ups, history stored on the evaluation (last 20 messages); 503 with default (en/ur) suggestions without a key; 409 until the report is done.
+- `POST /api/evaluations/compare`: 2 ids, same purpose, both done; winner chosen by score (ties → health), reason worded by the LLM or a template; rows for breed, age, health, purpose fit.
+- `docs/PROMPTS.md` (prompt design and versions for the thesis); `scripts/llm_smoke.js` (real-API check).
+
+### How it was tested
+- `npm test`: **61 passed** (23 new): request contents (image block, verdict, KB facts, Urdu instruction, model id, JSON schema), retry once, fallback after two invalid outputs, no retry on refusal or API error, breed check clamping and known-class check, pipeline with LLM report and breed check, LLM breed replacing the model's (Cholistani), LLM failure → template, Urdu template without key, chat (503 without key, answer stored, 20-message cap, validation), compare (winner by score, LLM reason, different purposes rejected, ownership).
+- Live run without a key (real ML service + Atlas): Urdu evaluation completed with the Urdu template report; chat returned 503 with Urdu suggestions. The breed model called a Holstein "Jersey" (41 %, uncertain), which is the case the LLM breed check is for.
+
+### Open items
+- Add `LLM_API_KEY` and run `node scripts/llm_smoke.js` to confirm real responses, Urdu quality and cost.
+- Re-check KB figures taken from search-result excerpts (Oklahoma State, TNAU, NDDB pages couldn't be opened from this network) before thesis submission.
+- `CLOUDINARY_CLOUD_NAME` still needs the dashboard's cloud name (Module 2).
+
+---
+
 ## Module 2 — Backend: evaluation pipeline and rules (2026-10-23)
 
 **Status:** done. One config fix needed: `CLOUDINARY_CLOUD_NAME` in `backend/.env` is `FYP_Project`, which Cloudinary rejects ("Invalid cloud_name"); it must be the dashboard's cloud name code. Until then photos aren't stored (the analysis still completes).
