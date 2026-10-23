@@ -1,18 +1,21 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { Camera, Sparkles } from "lucide-react-native";
-import { useCallback, useState } from "react";
+import { Camera, CloudUpload, RotateCcw, Sparkles } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AppText from "../../src/components/AppText";
+import Button from "../../src/components/Button";
 import { CattleSide } from "../../src/components/Illustrations";
 import { EmptyState, InfoBanner } from "../../src/components/Layout";
 import { ReportListItem } from "../../src/components/Report";
+import { ReportListSkeleton } from "../../src/components/States";
 import { useSession } from "../../src/context/SessionContext";
 import { useDirection } from "../../src/hooks/useDirection";
+import { usePending } from "../../src/offline/PendingContext";
 import { colors, radii, spacing } from "../../src/theme";
-import { listEvaluations } from "../../services/api";
+import { errorKind, listEvaluations } from "../../services/api";
 
 // Spec §4.6
 export default function Home() {
@@ -20,6 +23,8 @@ export default function Home() {
   const { t } = useTranslation();
   const { user, isGuest } = useSession();
   const [reports, setReports] = useState(null); // null = loading
+  const [error, setError] = useState(null); // errorKind() of the last failed load
+  const pending = usePending();
   const [refreshing, setRefreshing] = useState(false);
   const { ForwardChevron: Chevron } = useDirection();
   const name = user?.name?.split(" ")[0] || t("home.guestName");
@@ -28,8 +33,10 @@ export default function Home() {
     try {
       const { items } = await listEvaluations({ page: 1 });
       setReports(items.slice(0, 3));
-    } catch {
-      setReports([]);
+      setError(null);
+    } catch (err) {
+      setError(errorKind(err));
+      setReports((r) => r || []);
     }
   }, []);
 
@@ -38,6 +45,11 @@ export default function Home() {
       load();
     }, [load])
   );
+
+  // Queued offline checks just reached the server: show them
+  useEffect(() => {
+    if (pending.sentCount) load();
+  }, [pending.sentCount, load]);
 
   const refresh = async () => {
     setRefreshing(true);
@@ -66,6 +78,11 @@ export default function Home() {
         </View>
 
         {isGuest ? <View style={styles.banner}><InfoBanner text={t("home.guestBanner")} /></View> : null}
+        {pending.items.length ? (
+          <Pressable onPress={() => router.push("/history")} accessibilityRole="link" style={styles.banner}>
+            <InfoBanner variant="warning" icon={CloudUpload} text={t("pending.homeBanner", { count: pending.items.length })} />
+          </Pressable>
+        ) : null}
 
         <Pressable onPress={startCheck} accessibilityRole="button" accessibilityLabel={t("home.heroTitle")} style={({ pressed }) => [styles.hero, pressed && { opacity: 0.95 }]}>
           <View style={styles.heroTop}>
@@ -96,7 +113,12 @@ export default function Home() {
         </View>
 
         {reports === null ? (
-          <ActivityIndicator color={colors.primary} style={styles.loading} />
+          <ReportListSkeleton count={2} />
+        ) : error && reports.length === 0 ? (
+          <View style={styles.error}>
+            <InfoBanner variant="warning" text={t(`states.${error}Short`)} />
+            <Button title={t("common.retry")} icon={RotateCcw} variant="outline" size="normal" onPress={load} />
+          </View>
         ) : reports.length === 0 ? (
           <View style={styles.emptyWrap}>
             <EmptyState
@@ -150,7 +172,7 @@ const styles = StyleSheet.create({
   },
   sectionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 28, marginBottom: 14 },
   seeAll: { flexDirection: "row", alignItems: "center", gap: 2, minHeight: 48 },
-  loading: { marginTop: 24 },
+  error: { gap: 12 },
   emptyWrap: { minHeight: 320 },
   list: { gap: 12 }
 });

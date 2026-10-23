@@ -295,7 +295,7 @@ Tasks:
 
 ---
 
-## Module 8 — States, offline and polish
+## Module 8 — States, offline and polish ✅ Done 2026-10-24
 
 Tasks:
 - **No internet** state — photos kept on device in a pending queue (`expo-file-system` + AsyncStorage), "Try again" / "Check later"; auto-retry on reconnect (`@react-native-community/netinfo`), pending items shown at the top of History.

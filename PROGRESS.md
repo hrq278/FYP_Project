@@ -4,6 +4,30 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 8 — States, offline and polish (2026-10-24)
+
+**Status:** done (verified in the browser with airplane mode simulated; haptics, real airplane mode and system font size still to try on a phone).
+
+### What was done
+- **Offline queue** (`src/offline/pending.js` + `PendingContext.js`): when the upload fails for lack of internet, the check (5 photos + purpose form) is saved on the phone. Photos are copied to the app's document folder (data URLs on web) and the list is kept in AsyncStorage. `@react-native-community/netinfo` sends waiting checks automatically when the connection returns and when the app starts. A check is never uploaded twice: retries share one upload, and the queue keeps the token it was saved with. A guest who signs up keeps queued checks too (moved to the new account).
+- **No internet screen** `app/check/offline.jsx` (spec §5.1): "Your photos are saved on the phone…", "5 photos saved", **Try again** / **Check later**. If the photos were already sent and only the progress check lost the connection, it says so and Check later opens History.
+- **History**: saved checks at the top (dashed card with photo, "Waiting for internet" / "Sending…" / "Couldn't send", retry and delete buttons, delete asks first), an offline note, and the list reloads when they are sent. **Home**: banner "1 check is waiting to be sent".
+- **Error states** (`src/components/States.jsx`, `errorKind()` in `services/api.js`): separate screens for no internet, checking service down (503 / `reason: ml_unavailable`) and other server errors, used on Processing, Report, History, Compare and Home. Home no longer shows "No reports yet" when it simply couldn't load. Capture says "No internet, so this photo wasn't checked. You can still use it." Wrong-image and empty-history screens were already done (Modules 5 and 7).
+- **Loading skeletons** on Home and History (pulse stops when the phone asks for reduced motion).
+- **Haptics** (`expo-haptics`, `src/utils/haptics.js`): shutter tap, warning when a photo needs a retake, and success / warning / error when a just-finished report opens.
+- **Accessibility**: every icon-only button checked for a label. Large text tested at 1.3× in English and Urdu (browser hook `globalThis.__FONT_SCALE__`; phones use the system setting, capped at 1.3×). Fixed: the budget and seller's-price boxes now stack when text is large.
+- **App icon, adaptive icon, splash and favicon** rendered from the cattle-head logo (`assets/images/`, set in `app.json`).
+- Going to Home from a report or the offline screen now goes back to the existing tabs instead of stacking a second copy.
+
+### How it was tested
+- Playwright with a new test account: offline during the teeth photo (message shown), Analyze offline → No internet screen, queue holds 1 item with 5 photos, Try again while offline → back to the same screen with no duplicate, Check later → Home banner → History shows the saved check. Back online, it was sent automatically in 0.7 s and finished on the server (status done). Also checked: skeletons (slowed API), ML-down and server-error screens (mocked responses), 1.3× text on Home, History, Report, Purpose and Profile in both languages, and the Urdu offline screen. No page errors; test accounts deleted afterwards.
+- Android bundle builds. Backend unchanged (68 tests pass).
+
+### Open items
+- On a phone: real airplane mode, haptics, system font size, app icon (FIXES.md item 5).
+
+---
+
 ## Module 7 — Mobile: History, Compare, Profile (2026-10-24)
 
 **Status:** done (verified in the browser with real backend + ML service and Atlas data).

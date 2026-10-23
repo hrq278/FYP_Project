@@ -1,16 +1,19 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { CircleCheck, CircleDashed, CircleX, Clock, LoaderCircle, RotateCcw, X } from "lucide-react-native";
+import { CircleCheck, CircleDashed, CircleX, Clock, LoaderCircle, X } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Animated, Easing, StyleSheet, View } from "react-native";
 import AppText from "../../src/components/AppText";
 import Button from "../../src/components/Button";
 import { CattleSide } from "../../src/components/Illustrations";
-import { Card, EmptyState, Screen } from "../../src/components/Layout";
+import { Card, Screen } from "../../src/components/Layout";
+import { ErrorState } from "../../src/components/States";
 import { useCheckFlow, VIEWS, parsePkr } from "../../src/context/CheckFlowContext";
 import { colors, verdictColors } from "../../src/theme";
-import { createEvaluation, getEvaluation } from "../../services/api";
+import { addPending } from "../../src/offline/pending";
+import { usePending } from "../../src/offline/PendingContext";
+import { createEvaluation, errorKind, getEvaluation } from "../../services/api";
 
 const POLL_MS = 1500;
 const STEP_KEYS = ["species", "breed", "age", "health", "report"];
@@ -42,8 +45,10 @@ export default function Processing() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const flow = useCheckFlow();
+  const pending = usePending();
   const [steps, setSteps] = useState(waitingSteps);
   const [phase, setPhase] = useState("uploading"); // uploading | polling | failed
+  const [failKind, setFailKind] = useState("server"); // server | ml
   const cancelled = useRef(false);
   const progress = useRef(new Animated.Value(0)).current;
 
@@ -56,20 +61,32 @@ export default function Processing() {
     cancelled.current = false;
     setPhase("uploading");
     setSteps(waitingSteps());
+    let id = flow.evaluationId;
     try {
-      let id = flow.evaluationId;
-      if (!id) {
-        const photos = Object.fromEntries(VIEWS.map((v) => [v, flow.photos[v].uri]));
-        const quality = Object.fromEntries(VIEWS.map((v) => [v, flow.photos[v].quality || null]));
-        ({ id } = await createEvaluation({
-          photos,
-          quality,
+      if (!id && flow.pendingId) {
+        // Already saved on the phone after an earlier upload failed: send that copy
+        id = await pending.retry(flow.pendingId);
+        flow.update({ evaluationId: id, pendingId: null });
+      } else if (!id) {
+        const check = {
+          photos: Object.fromEntries(VIEWS.map((v) => [v, flow.photos[v].uri])),
+          quality: Object.fromEntries(VIEWS.map((v) => [v, flow.photos[v].quality || null])),
           purpose: flow.purpose,
           budget: parsePkr(flow.budget),
           sellerPrice: parsePkr(flow.sellerPrice),
           experience: flow.experience,
           language: i18n.language === "ur" ? "ur" : "en"
-        }));
+        };
+        try {
+          ({ id } = await createEvaluation(check));
+        } catch (error) {
+          if (errorKind(error) !== "network") throw error;
+          // No internet: keep the check on the phone; it is sent automatically when back online
+          const item = await addPending(check);
+          flow.update({ pendingId: item.id });
+          if (!cancelled.current) router.replace("/check/offline");
+          return;
+        }
         flow.update({ evaluationId: id });
       }
       setPhase("polling");
@@ -77,7 +94,7 @@ export default function Processing() {
         const e = await getEvaluation(id);
         setSteps(e.steps?.length ? e.steps : waitingSteps());
         if (e.status === "done") {
-          router.replace(`/report/${id}`);
+          router.replace({ pathname: `/report/${id}`, params: { fresh: "1" } });
           return;
         }
         if (e.status === "rejected") {
@@ -85,16 +102,25 @@ export default function Processing() {
           return;
         }
         if (e.status === "failed") {
+          setFailKind(e.reason === "ml_unavailable" ? "ml" : "server");
           setPhase("failed");
           flow.update({ evaluationId: null }); // a retry creates a new evaluation
           return;
         }
         await new Promise((r) => setTimeout(r, POLL_MS));
       }
-    } catch {
-      if (!cancelled.current) setPhase("failed");
+    } catch (error) {
+      if (cancelled.current) return;
+      const kind = errorKind(error);
+      if (kind === "network") {
+        // Lost the connection: either the queued copy is still waiting, or the check was sent and runs on the server
+        router.replace({ pathname: "/check/offline", params: id ? { sent: "1" } : {} });
+        return;
+      }
+      setFailKind(kind === "ml" ? "ml" : "server");
+      setPhase("failed");
     }
-  }, [flow, i18n.language, router]);
+  }, [flow, i18n.language, router, pending]);
 
   useFocusEffect(
     useCallback(() => {
@@ -115,12 +141,11 @@ export default function Processing() {
   if (phase === "failed") {
     return (
       <Screen fixed>
-        <EmptyState
-          illustration={<CircleX size={72} color={verdictColors.not_recommended.fill} strokeWidth={2} />}
-          tileBg={verdictColors.not_recommended.bg}
-          title={t("check.failedTitle")}
-          body={t("check.failedBody")}
-          primary={{ title: t("common.retry"), icon: RotateCcw, onPress: run }}
+        <ErrorState
+          kind={failKind}
+          title={failKind === "server" ? t("check.failedTitle") : undefined}
+          body={failKind === "server" ? t("check.failedBody") : t("check.mlBody")}
+          onRetry={run}
           secondary={{ title: t("common.cancel"), icon: X, onPress: cancel }}
         />
       </Screen>

@@ -2,7 +2,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   CalendarDays,
   CircleCheck,
-  CircleHelp,
   Download,
   Dna,
   HeartPulse,
@@ -21,13 +20,15 @@ import { ActivityIndicator, Image, Pressable, StyleSheet, View } from "react-nat
 import AppText from "../../../src/components/AppText";
 import Button from "../../../src/components/Button";
 import { CattleHeadIcon } from "../../../src/components/Illustrations";
-import { Accordion, EmptyState, InfoBanner, Screen, ScreenHeader } from "../../../src/components/Layout";
+import { Accordion, InfoBanner, Screen, ScreenHeader } from "../../../src/components/Layout";
 import { ConfidenceBar, InfoTile, ScoreRing, VerdictBadge } from "../../../src/components/Report";
+import { ErrorState } from "../../../src/components/States";
 import { useSession } from "../../../src/context/SessionContext";
 import { createReportPdf, reportLink } from "../../../src/report/pdf";
 import { sharePdf, shareOnWhatsApp } from "../../../src/report/share";
 import { colors, verdictColors } from "../../../src/theme";
-import { getEvaluation } from "../../../services/api";
+import { verdictHaptic } from "../../../src/utils/haptics";
+import { errorKind, getEvaluation } from "../../../services/api";
 
 const WHATSAPP_GREEN = "#1E7A3E";
 
@@ -41,34 +42,40 @@ const Bullets = ({ items }) =>
 
 // Spec §4.12
 export default function Result() {
-  const { id } = useLocalSearchParams();
+  const { id, fresh } = useLocalSearchParams();
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const { user } = useSession();
   const [e, setE] = useState(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null); // null or errorKind()
   const [pdfBusy, setPdfBusy] = useState(false);
   const [notice, setNotice] = useState(null);
   const timer = useRef(null);
+  const buzzed = useRef(false);
 
   const load = useCallback(async () => {
     try {
       const ev = await getEvaluation(id);
       setE(ev);
-      setError(false);
+      setError(null);
+      // Just finished processing: a short buzz that matches the verdict
+      if (fresh === "1" && ev.status === "done" && !buzzed.current) {
+        buzzed.current = true;
+        verdictHaptic(ev.verdict);
+      }
       // Opened while still processing (e.g. from History): keep checking
       if (ev.status === "processing") timer.current = setTimeout(load, 2000);
-    } catch {
-      setError(true);
+    } catch (err) {
+      setError(errorKind(err));
     }
-  }, [id]);
+  }, [id, fresh]);
 
   useEffect(() => {
     load();
     return () => clearTimeout(timer.current);
   }, [load]);
 
-  const goHome = () => router.replace("/home");
+  const goHome = () => router.dismissTo("/home");
   const lang = i18n.language === "ur" ? "ur" : "en";
 
   const makePdf = () => createReportPdf({ e, t, lang, preparedFor: user?.name });
@@ -101,7 +108,7 @@ export default function Result() {
       <Screen fixed>
         <ScreenHeader title={t("report.title")} onBack={goHome} />
         {error ? (
-          <EmptyState illustration={<CircleHelp size={64} color={colors.primary} />} title={t("report.loadError")} primary={{ title: t("common.retry"), onPress: load }} />
+          <ErrorState kind={error} title={error === "server" ? t("report.loadError") : undefined} onRetry={load} />
         ) : (
           <View style={styles.center}>
             <ActivityIndicator color={colors.primary} size="large" />
@@ -113,7 +120,14 @@ export default function Result() {
   }
 
   if (e.status !== "done") {
-    const message = e.status === "processing" ? t("report.processing") : e.status === "rejected" ? t("report.rejected") : t("report.failed");
+    const message =
+      e.status === "processing"
+        ? t("report.processing")
+        : e.status === "rejected"
+          ? t("report.rejected")
+          : e.reason === "ml_unavailable"
+            ? t("report.mlFailed")
+            : t("report.failed");
     return (
       <Screen fixed>
         <ScreenHeader title={t("report.title")} onBack={goHome} />

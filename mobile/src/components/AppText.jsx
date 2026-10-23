@@ -12,7 +12,10 @@ export default function AppText({ variant = "body", weight, color = colors.textP
   const w = weight || defaultWeight;
   const urdu = i18n.language === "ur" && !latin;
   const family = (urdu ? fonts.urdu : fonts.latin)[w] || fonts.latin[w];
-  const lineHeight = Math.round(size * (urdu ? URDU_LINE_HEIGHT : variant === "display" || variant === "h1" ? 1.15 : 1.35));
+  // Phones scale text by the system font size (capped at 1.3x below); the browser has no such setting,
+  // so layout checks of large text set globalThis.__FONT_SCALE__ instead
+  const scale = Platform.OS === "web" ? globalThis.__FONT_SCALE__ || 1 : 1;
+  const lineHeight = Math.round(size * scale * (urdu ? URDU_LINE_HEIGHT : variant === "display" || variant === "h1" ? 1.15 : 1.35));
   // Align to the start of the line. Native RN swaps left/right in RTL, so "left" already means "start";
   // the browser doesn't, so on web Urdu screens use "right" (keeps Latin names aligned with the Urdu text)
   const startAlign = Platform.OS === "web" && i18n.language === "ur" ? "right" : "left";
@@ -21,7 +24,7 @@ export default function AppText({ variant = "body", weight, color = colors.textP
     <Text
       style={[
         styles.base,
-        { fontSize: urdu ? Math.round(size * 0.92) : size, fontFamily: family, lineHeight, color, textAlign: startAlign },
+        { fontSize: Math.round(size * scale * (urdu ? 0.92 : 1)), fontFamily: family, lineHeight, color, textAlign: startAlign },
         variant === "overline" && styles.overline,
         align && { textAlign: align },
         style

@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { deleteAccount as deleteAccountApi, fetchProfile, guestLogin, logoutUser, saveSettings, TOKEN_KEY } from "../../services/api";
 import i18n from "../i18n";
+import { retagPending } from "../offline/pending";
 
 const GUEST_KEY = "guest";
 const ONBOARDING_KEY = "onboardingDone";
@@ -35,6 +36,9 @@ export function SessionProvider({ children }) {
 
   const signIn = useCallback(
     async (token) => {
+      const [[, oldToken], [, wasGuest]] = await AsyncStorage.multiGet([TOKEN_KEY, GUEST_KEY]);
+      // The server moved the guest's reports to this account; queued offline checks follow
+      if (oldToken && wasGuest === "1") await retagPending(oldToken, token);
       await AsyncStorage.multiSet([[TOKEN_KEY, token], [GUEST_KEY, "0"]]);
       setState((s) => ({ ...s, token, isGuest: false }));
       const user = await loadProfile();

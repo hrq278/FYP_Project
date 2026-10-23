@@ -28,8 +28,9 @@ import { BackButton, ConfirmDialog } from "../../../src/components/Layout";
 import { Stepper } from "../../../src/components/Report";
 import { useCheckFlow, VIEWS } from "../../../src/context/CheckFlowContext";
 import { colors, radii, warningColors } from "../../../src/theme";
+import { captureTap, photoWarning } from "../../../src/utils/haptics";
 import { compressPhoto } from "../../../src/utils/photo";
-import { checkPhoto } from "../../../services/api";
+import { checkPhoto, errorKind } from "../../../services/api";
 
 const FLASH_CYCLE = ["off", "auto", "on"];
 
@@ -45,7 +46,7 @@ export default function Capture() {
   const index = VIEWS.indexOf(view);
   const [flash, setFlash] = useState(teeth ? "on" : "off");
   const [busy, setBusy] = useState(false);
-  const [problem, setProblem] = useState(null); // { photo, issues: [], error }
+  const [problem, setProblem] = useState(null); // { photo, issues: [], error: false | "network" | "server" }
   const [frame, setFrame] = useState({ width: 0, height: 0 });
   const [confirmClose, setConfirmClose] = useState(false);
 
@@ -75,8 +76,10 @@ export default function Capture() {
       let result;
       try {
         result = await checkPhoto(small.uri, view);
-      } catch {
-        setProblem({ photo: { uri: small.uri, quality: null, species: null }, issues: [], error: true });
+      } catch (error) {
+        // Offline the photo can still be used; the full check runs (or is queued) after Analyze
+        photoWarning();
+        setProblem({ photo: { uri: small.uri, quality: null, species: null }, issues: [], error: errorKind(error) === "network" ? "network" : "server" });
         return;
       }
       const photo = { uri: small.uri, quality: result.quality, species: result.species };
@@ -86,7 +89,10 @@ export default function Capture() {
         return;
       }
       if (result.quality?.ok) accept(photo);
-      else setProblem({ photo, issues: result.quality?.issues || [], error: false });
+      else {
+        photoWarning();
+        setProblem({ photo, issues: result.quality?.issues || [], error: false });
+      }
     } finally {
       setBusy(false);
     }
@@ -94,6 +100,7 @@ export default function Capture() {
 
   const capture = async () => {
     if (!cameraRef.current || busy) return;
+    captureTap();
     const shot = await cameraRef.current.takePictureAsync({ quality: 0.9 });
     if (shot?.uri) await handlePhoto(shot);
   };
@@ -213,7 +220,7 @@ export default function Capture() {
             <View style={styles.problemHead}>
               <TriangleAlert size={22} color={warningColors.border} strokeWidth={2.6} />
               <AppText variant="bodyStrong" color={warningColors.bannerText} style={styles.flex}>
-                {problem.error ? t("check.qualityError") : problem.issues.map((i) => t(`check.issues.${i}`, { defaultValue: i })).join(" · ")}
+                {problem.error === "network" ? t("check.qualityOffline") : problem.error ? t("check.qualityError") : problem.issues.map((i) => t(`check.issues.${i}`, { defaultValue: i })).join(" · ")}
               </AppText>
             </View>
             <View style={styles.problemActions}>

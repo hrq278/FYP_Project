@@ -2,7 +2,7 @@ import { useRouter } from "expo-router";
 import { ArrowUp, CircleEllipsis, Heart, Milk, MoonStar, Scale, Star, Tractor } from "lucide-react-native";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, useWindowDimensions, View } from "react-native";
 import AppText from "../../src/components/AppText";
 import Button from "../../src/components/Button";
 import { BackButton, Screen } from "../../src/components/Layout";
@@ -25,6 +25,9 @@ const PURPOSES = [
 export default function Purpose() {
   const router = useRouter();
   const { t } = useTranslation();
+  // With large system text the two PKR boxes are too narrow side by side: stack them
+  const { fontScale } = useWindowDimensions();
+  const stackPrices = (Platform.OS === "web" ? globalThis.__FONT_SCALE__ || 1 : fontScale) > 1.15;
   const { ForwardArrow } = useDirection();
   const flow = useCheckFlow();
 
@@ -67,7 +70,7 @@ export default function Purpose() {
         <AppText variant="section">{t("check.moreDetails")}</AppText>
         <AppText variant="caption" weight={500} color={colors.textMuted}>{t("check.optional")}</AppText>
       </View>
-      <View style={styles.prices}>
+      <View style={[styles.prices, stackPrices && styles.pricesStacked]}>
         <TextField
           label={t("check.budget")}
           prefix="PKR"
@@ -112,6 +115,7 @@ const styles = StyleSheet.create({
   cardLabel: { paddingEnd: 8 },
   sectionRow: { flexDirection: "row", alignItems: "baseline", gap: 8, marginTop: 24, marginBottom: 12 },
   prices: { flexDirection: "row", gap: 10 },
+  pricesStacked: { flexDirection: "column", gap: 14 },
   price: { flex: 1 },
   expLabel: { marginTop: 18, marginBottom: 8 }
 });

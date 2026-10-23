@@ -12,7 +12,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#1F5F3A"
+          "backgroundColor": "#1F5F3A",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 140
         }
       ],
       "expo-asset"
@@ -24,11 +26,17 @@
       "supportsRTL": true
     },
     "android": {
-      "backgroundColor": "#FAF7F0"
+      "backgroundColor": "#FAF7F0",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1F5F3A"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
-    }
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "icon": "./assets/images/icon.png"
   }
 }

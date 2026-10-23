@@ -11,7 +11,8 @@ const api = axios.create({
 
 api.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem(TOKEN_KEY);
-  if (token) {
+  // A queued offline check sends the token it was saved with (see src/offline/pending.js)
+  if (token && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -21,6 +22,13 @@ api.interceptors.request.use(async (config) => {
 export const errorKey = (error) => {
   if (!error?.response) return "network";
   return "failed";
+};
+
+// Which error screen to show: no internet, the ML service is down (503), or anything else
+export const errorKind = (error) => {
+  if (!error?.response) return "network";
+  if (error.response.status === 503) return "ml";
+  return "server";
 };
 
 export const registerUser = async (payload) => (await api.post("/api/auth/register", payload)).data;
@@ -58,8 +66,9 @@ export const checkPhoto = async (uri, view) => {
 /**
  * Starts an evaluation: 5 photos + purpose form. Returns { id, reportId, status }.
  * @param {object} p { photos: { front, back, left, right, teeth } (uris), purpose, budget, sellerPrice, experience, language, quality }
+ * @param {string} [token] send as this user instead of the signed-in one (queued offline checks)
  */
-export const createEvaluation = async ({ photos, purpose, budget, sellerPrice, experience, language, quality }) => {
+export const createEvaluation = async ({ photos, purpose, budget, sellerPrice, experience, language, quality }, token) => {
   const form = new FormData();
   for (const view of ["front", "back", "left", "right", "teeth"]) {
     await appendImage(form, view, photos[view]);
@@ -70,7 +79,8 @@ export const createEvaluation = async ({ photos, purpose, budget, sellerPrice, e
   if (budget) form.append("budget", String(budget));
   if (sellerPrice) form.append("sellerPrice", String(sellerPrice));
   if (quality) form.append("quality", JSON.stringify(quality));
-  return (await api.post("/api/evaluations", form, { headers: { "Content-Type": "multipart/form-data" }, timeout: 60000 })).data;
+  const headers = { "Content-Type": "multipart/form-data", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  return (await api.post("/api/evaluations", form, { headers, timeout: 60000 })).data;
 };
 
 export const getEvaluation = async (id) => (await api.get(`/api/evaluations/${id}`)).data.evaluation;

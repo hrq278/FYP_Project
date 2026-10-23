@@ -45,6 +45,10 @@ Also make sure your current IP is allowed under Atlas → **Network Access**.
 
 Everything so far was checked in a browser at phone size. On a phone, check:
 - History: pull down to refresh, long-press a report to start selecting, and scrolling to load more;
+- **airplane mode**: take the 5 photos, turn on airplane mode, tap Analyze → "No internet connection" screen → Check later; turn airplane mode off and the check should send itself within a few seconds and appear in History. Also close the app while offline and reopen it online: the saved check should still send;
+- **vibration** on the shutter, on a photo that needs a retake, and when a finished report opens;
+- **large text**: Android Settings → Display → Font size to the largest, then look at Home, Purpose, the report and History;
+- the new **app icon** (green with the white cattle head) and the green splash screen. The icon only shows in a development or release build, not inside Expo Go;
 - fonts (English and Urdu) and switching language (the app restarts once into right-to-left);
 - the live camera, flash, the camera-permission prompt and Gallery;
 - keyboard covering inputs on Login, Register and Purpose;
@@ -69,7 +73,7 @@ A few numbers in `backend/data/breeds.json` came from search-result excerpts bec
 
 Test accounts created while building:
 - `claude-smoketest-1792732144@example.com` (2 evaluations)
-- `claude-m2-1792756718@example.com` (several evaluations, including Module 5-6 test runs)
+- `claude-m2-1792756718@example.com` (several evaluations, including Module 5-8 test runs)
 
 Delete them in Atlas → Browse Collections (`users` and `evaluations`), or ask Claude to do it.
 

@@ -11,7 +11,9 @@ const initial = () => ({
   photos: {},
   // set when the user retakes one photo from Review; capture returns to Review afterwards
   retakeView: null,
-  evaluationId: null
+  evaluationId: null,
+  // set when the upload failed for lack of internet and the check was queued on the phone (src/offline)
+  pendingId: null
 });
 
 const CheckFlowContext = createContext(null);

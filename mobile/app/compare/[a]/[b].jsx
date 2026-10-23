@@ -1,15 +1,16 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { CircleCheck, CircleHelp, FileText, TriangleAlert, Trophy } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { CircleCheck, FileText, TriangleAlert, Trophy } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, StyleSheet, View } from "react-native";
 import AppText from "../../../src/components/AppText";
 import Button from "../../../src/components/Button";
 import { CattleHeadIcon } from "../../../src/components/Illustrations";
-import { EmptyState, Screen, ScreenHeader } from "../../../src/components/Layout";
+import { Screen, ScreenHeader } from "../../../src/components/Layout";
 import { VerdictBadge } from "../../../src/components/Report";
+import { ErrorState } from "../../../src/components/States";
 import { colors, verdictColors } from "../../../src/theme";
-import { compareEvaluations } from "../../../services/api";
+import { compareEvaluations, errorKind } from "../../../services/api";
 
 const FIT_BARS = { strong: [3, verdictColors.recommended.fill], fair: [2, verdictColors.caution.fill], weak: [1, verdictColors.not_recommended.fill], unknown: [0, colors.iconInactive] };
 
@@ -42,20 +43,28 @@ export default function Compare() {
   const router = useRouter();
   const { t } = useTranslation();
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // { kind, message }
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setError(null);
     compareEvaluations([a, b])
       .then(setData)
-      .catch((e) => setError(e.response?.data?.message || t("compare.error")));
-  }, [a, b, t]);
+      .catch((e) => setError({ kind: errorKind(e), message: e.response?.data?.message }));
+  }, [a, b]);
+
+  useEffect(load, [load]);
 
   if (error || !data) {
     return (
       <Screen fixed>
         <ScreenHeader title={t("compare.title")} />
         {error ? (
-          <EmptyState illustration={<CircleHelp size={64} color={colors.primary} />} title={t("compare.error")} body={error} />
+          <ErrorState
+            kind={error.kind}
+            title={error.kind === "server" ? t("compare.error") : undefined}
+            body={error.kind === "server" ? error.message : undefined}
+            onRetry={load}
+          />
         ) : (
           <ActivityIndicator color={colors.primary} style={styles.loading} />
         )}

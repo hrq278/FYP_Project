@@ -8,12 +8,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppText from "../../src/components/AppText";
 import Button from "../../src/components/Button";
 import { CattleSide } from "../../src/components/Illustrations";
-import { EmptyState, InfoBanner } from "../../src/components/Layout";
+import { ConfirmDialog, EmptyState, InfoBanner } from "../../src/components/Layout";
 import { ReportListItem } from "../../src/components/Report";
+import { ErrorState, PendingListItem, ReportListSkeleton } from "../../src/components/States";
 import { Chip } from "../../src/components/Selection";
 import { useSession } from "../../src/context/SessionContext";
+import { usePending } from "../../src/offline/PendingContext";
 import { colors, fonts, radii, spacing, verdictColors } from "../../src/theme";
-import { listEvaluations } from "../../services/api";
+import { errorKind, listEvaluations } from "../../services/api";
 
 const FILTERS = [
   { key: null, icon: null },
@@ -32,13 +34,15 @@ export default function History() {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null); // errorKind() of the last failed load
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState(""); // debounced query
   const [verdict, setVerdict] = useState(null);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]); // report items (keeps purpose/status for the checks)
   const [hint, setHint] = useState(null);
+  const [confirmDrop, setConfirmDrop] = useState(null); // queued check to delete
+  const pending = usePending();
   const request = useRef(0);
 
   useEffect(() => {
@@ -60,9 +64,9 @@ export default function History() {
         setItems((prev) => (nextPage === 1 || !prev ? res.items : [...prev, ...res.items]));
         setTotal(res.total);
         setPage(nextPage);
-        setError(false);
-      } catch {
-        if (mine === request.current) setError(true);
+        setError(null);
+      } catch (err) {
+        if (mine === request.current) setError(errorKind(err));
       }
     },
     [verdict, search]
@@ -73,6 +77,13 @@ export default function History() {
       load(1);
     }, [load])
   );
+
+  // Queued offline checks just reached the server: show them as reports
+  useEffect(() => {
+    if (pending.sentCount) load(1);
+  }, [pending.sentCount, load]);
+
+  const retryPending = (id) => pending.retry(id).catch(() => {}); // the row shows the new state
 
   const loadMore = async () => {
     if (loadingMore || !items || items.length >= total) return;
@@ -108,9 +119,21 @@ export default function History() {
   };
 
   const filtered = Boolean(search || verdict);
+  const queued = filtered ? [] : pending.items;
 
   const header = (
     <View>
+      {/* offline, the note above the saved checks already says so */}
+      {error && queued.length && pending.online ? <View style={styles.pending}><InfoBanner variant="warning" text={t(`states.${error}Short`)} /></View> : null}
+      {queued.length ? (
+        <View style={styles.pending}>
+          <AppText variant="bodyStrong" color={colors.textMuted}>{t("pending.section", { count: queued.length })}</AppText>
+          {!pending.online ? <InfoBanner variant="warning" text={t("pending.offlineNote")} /> : null}
+          {queued.map((p) => (
+            <PendingListItem key={p.id} item={p} onRetry={() => retryPending(p.id)} onDelete={() => setConfirmDrop(p)} />
+          ))}
+        </View>
+      ) : null}
       {isGuest ? (
         <View style={styles.guest}>
           <InfoBanner text={t("history.guestBanner")} />
@@ -173,12 +196,14 @@ export default function History() {
       </View>
 
       {items === null && !error ? (
-        <ActivityIndicator color={colors.primary} style={styles.loading} />
-      ) : error && !items ? (
-        <View style={styles.emptyWrap}>
-          <EmptyState illustration={<XCircle size={64} color={colors.primary} />} title={t("history.loadError")} primary={{ title: t("common.retry"), onPress: () => load(1) }} />
+        <View style={styles.list}>
+          <ReportListSkeleton count={4} />
         </View>
-      ) : items.length === 0 && !filtered ? (
+      ) : error && !items && !queued.length ? (
+        <View style={styles.emptyWrap}>
+          <ErrorState kind={error} title={error === "server" ? t("history.loadError") : undefined} onRetry={() => load(1)} />
+        </View>
+      ) : !items?.length && !filtered && !queued.length ? (
         <View style={styles.emptyWrap}>
           {header}
           <EmptyState
@@ -190,15 +215,17 @@ export default function History() {
         </View>
       ) : (
         <FlatList
-          data={items}
+          data={items || []}
           keyExtractor={(i) => String(i.id)}
           contentContainerStyle={styles.list}
           ListHeaderComponent={header}
           ListEmptyComponent={
-            <View style={styles.noResults}>
-              <AppText variant="bodyLarge" color={colors.textMuted} align="center">{t("history.noResults")}</AppText>
-              <Button title={t("history.clearFilters")} variant="outline" size="normal" onPress={() => { setQuery(""); setVerdict(null); }} />
-            </View>
+            filtered ? (
+              <View style={styles.noResults}>
+                <AppText variant="bodyLarge" color={colors.textMuted} align="center">{t("history.noResults")}</AppText>
+                <Button title={t("history.clearFilters")} variant="outline" size="normal" onPress={() => { setQuery(""); setVerdict(null); }} />
+              </View>
+            ) : null
           }
           ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.primary} style={styles.more} /> : null}
           onEndReached={loadMore}
@@ -226,6 +253,19 @@ export default function History() {
           <Button title={t("history.compare", { count: selected.length })} icon={Columns2} onPress={compare} disabled={selected.length !== 2} />
         </View>
       ) : null}
+      <ConfirmDialog
+        visible={Boolean(confirmDrop)}
+        title={t("pending.deleteTitle")}
+        body={t("pending.deleteBody")}
+        confirmLabel={t("pending.deleteConfirm")}
+        cancelLabel={t("common.cancel")}
+        destructive
+        onCancel={() => setConfirmDrop(null)}
+        onConfirm={() => {
+          pending.remove(confirmDrop.id);
+          setConfirmDrop(null);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -250,7 +290,7 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, minWidth: 0, fontSize: 17, fontFamily: fonts.latin[500], color: colors.textPrimary, paddingVertical: 10 },
   searchUrdu: { fontFamily: fonts.urdu[500], fontSize: 16 },
   chips: { gap: 8, paddingBottom: 6 },
-  loading: { marginTop: 40 },
+  pending: { gap: 10, marginBottom: 14 },
   emptyWrap: { flex: 1, paddingHorizontal: spacing.screen, paddingBottom: spacing.lg },
   list: { padding: spacing.screen, paddingTop: 10, gap: 12 },
   guest: { gap: 4, marginBottom: 8 },
