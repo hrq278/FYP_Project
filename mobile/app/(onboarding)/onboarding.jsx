@@ -66,7 +66,7 @@ const STEPS = [
 export default function Onboarding() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { finishOnboarding } = useSession();
+  const { finishOnboarding, token } = useSession();
   const { width } = useWindowDimensions();
   const pageWidth = width - spacing.screen * 2;
   const listRef = useRef(null);
@@ -74,9 +74,11 @@ export default function Onboarding() {
   const { ForwardArrow: Arrow } = useDirection();
   const last = index === STEPS.length - 1;
 
+  // First run goes on to Login; opened later as "photo tips", it just closes
   const done = async () => {
     await finishOnboarding();
-    router.replace("/login");
+    if (token && router.canGoBack()) router.back();
+    else router.replace("/login");
   };
   const next = () => {
     if (last) return done();

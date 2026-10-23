@@ -135,3 +135,38 @@ const styles = StyleSheet.create({
   accordionHeader: { minHeight: 58, flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
   accordionBody: { paddingHorizontal: 16, paddingBottom: 16, gap: 8 }
 });
+
+// Two-button confirm dialog in the app's style (RN's Alert does nothing on web)
+export function ConfirmDialog({ visible, title, body, confirmLabel, cancelLabel, onConfirm, onCancel, destructive = false }) {
+  if (!visible) return null;
+  return (
+    <View style={dialogStyles.backdrop} accessibilityViewIsModal>
+      <View style={dialogStyles.box} accessibilityRole="alert">
+        <AppText variant="title">{title}</AppText>
+        {body ? <AppText variant="body" color={colors.textSecondary}>{body}</AppText> : null}
+        <View style={dialogStyles.actions}>
+          <Button title={cancelLabel} variant="outline" size="normal" onPress={onCancel} style={dialogStyles.btn} />
+          <Button title={confirmLabel} variant={destructive ? "dark" : "primary"} size="normal" onPress={onConfirm} style={dialogStyles.btn} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const dialogStyles = StyleSheet.create({
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    start: 0,
+    end: 0,
+    backgroundColor: "rgba(16,21,15,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    zIndex: 50
+  },
+  box: { alignSelf: "stretch", backgroundColor: colors.surface, borderRadius: 24, padding: 22, gap: 10 },
+  actions: { flexDirection: "row", gap: 10, marginTop: 10 },
+  btn: { flex: 1 }
+});

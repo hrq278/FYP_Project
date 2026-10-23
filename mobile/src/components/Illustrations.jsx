@@ -110,3 +110,77 @@ export function Hills({ width = 360, color = "rgba(255,255,255,0.25)" }) {
     </Svg>
   );
 }
+
+// ------------------------------------------------------------------------------- camera overlays
+// Dashed white silhouettes with a 20% fill (spec §4.8), drawn on a 200x200 grid and scaled to the viewfinder.
+const OVERLAY = { stroke: "#FFFFFF", strokeWidth: 3, strokeDasharray: "9 7", strokeLinecap: "round", strokeLinejoin: "round", fill: "rgba(255,255,255,0.2)" };
+
+const FRONT = [
+  "M74 46 Q66 30 56 22 M126 46 Q134 30 144 22", // horns
+  "M74 52 L52 60 L72 70 M126 52 L148 60 L128 70", // ears
+  "M74 46 L126 46 L122 98 Q100 108 78 98 Z", // head
+  "M66 104 Q56 120 58 150 L142 150 Q144 120 134 104 Q100 92 66 104 Z", // chest
+  "M66 150 L66 186 M84 150 L84 186 M116 150 L116 186 M134 150 L134 186" // legs
+];
+const BACK = [
+  "M60 52 Q100 36 140 52 L146 120 Q100 132 54 120 Z", // rump
+  "M100 54 Q104 90 98 128", // tail
+  "M62 120 L60 186 M82 124 L82 186 M118 124 L118 186 M138 120 L140 186" // hind legs
+];
+const SIDE = [
+  "M46 80 Q50 66 66 64 Q70 52 80 52 Q88 52 90 62 L148 62 Q170 62 174 82 L174 112 Q174 122 164 122 L60 122 Q48 122 46 110",
+  "M46 80 L28 82 Q16 86 18 98 Q20 106 30 106 L40 104 Q46 102 46 96",
+  "M30 82 L22 72",
+  "M60 122 L60 160 M74 122 L74 160 M150 122 L150 160 M164 122 L164 160",
+  "M174 86 Q186 98 182 128"
+];
+
+export function CaptureOverlay({ view, size = 280 }) {
+  const paths = view === "front" ? FRONT : view === "back" ? BACK : SIDE;
+  // Right side is the left-side silhouette mirrored
+  const mirror = view === "right" ? "translate(200 0) scale(-1 1)" : undefined;
+  return (
+    <Svg width={size} height={size} viewBox="0 0 200 200" pointerEvents="none">
+      <G transform={mirror}>
+        {paths.map((d) => (
+          <Path key={d} d={d} {...OVERLAY} fill={d.includes("Z") || d === SIDE[0] ? OVERLAY.fill : "none"} />
+        ))}
+      </G>
+    </Svg>
+  );
+}
+
+// Mouth outline for the teeth step: lips, gum line and 8 incisors
+export function MouthOverlay({ width = 300 }) {
+  const teeth = [52, 70, 88, 106, 124, 142];
+  return (
+    <Svg width={width} height={width * 0.48} viewBox="0 0 250 120" pointerEvents="none">
+      <Path d="M10 60 Q125 -6 240 60 Q125 126 10 60 Z" {...OVERLAY} />
+      <Path d="M40 56 Q125 30 210 56" {...OVERLAY} fill="none" />
+      <Rect x={34} y={58} width={14} height={22} rx={4} {...OVERLAY} />
+      {teeth.map((x) => (
+        <Rect key={x} x={x} y={52} width={14} height={30} rx={4} {...OVERLAY} />
+      ))}
+      <Rect x={160} y={58} width={14} height={22} rx={4} {...OVERLAY} />
+      <Rect x={178} y={60} width={14} height={18} rx={4} {...OVERLAY} />
+    </Svg>
+  );
+}
+
+// Amber corner brackets around the viewfinder
+export function CornerBrackets({ width, height, color = colors.accentBright, length = 44, thickness = 6 }) {
+  const t = thickness / 2;
+  const d = [
+    `M${t} ${length} L${t} ${t} L${length} ${t}`,
+    `M${width - length} ${t} L${width - t} ${t} L${width - t} ${length}`,
+    `M${t} ${height - length} L${t} ${height - t} L${length} ${height - t}`,
+    `M${width - length} ${height - t} L${width - t} ${height - t} L${width - t} ${height - length}`
+  ];
+  return (
+    <Svg width={width} height={height} style={{ position: "absolute", top: 0, left: 0 }} pointerEvents="none">
+      {d.map((p) => (
+        <Path key={p} d={p} stroke={color} strokeWidth={thickness} fill="none" strokeLinecap="square" />
+      ))}
+    </Svg>
+  );
+}

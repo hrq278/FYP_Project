@@ -133,5 +133,113 @@
     "cow": "Cow",
     "buffalo": "Buffalo",
     "unknown": "Not cattle"
+  },
+  "check": {
+    "newCheck": "New check",
+    "purposeTitle": "Why are you buying this animal?",
+    "moreDetails": "More details",
+    "optional": "Optional",
+    "budget": "Your budget",
+    "sellerPrice": "Seller's price",
+    "experience": "Your experience",
+    "firstTime": "First-time buyer",
+    "experienced": "Experienced",
+    "nextPhotos": "Next: take photos",
+    "step": "Step {{current}} of {{total}}",
+    "views": {
+      "front": "Front",
+      "back": "Back",
+      "left": "Left",
+      "right": "Right",
+      "teeth": "Teeth"
+    },
+    "viewTitles": {
+      "front": "Front View",
+      "back": "Back View",
+      "left": "Left Side",
+      "right": "Right Side",
+      "teeth": "Teeth (for age)"
+    },
+    "tips": {
+      "front": "Keep the full animal in frame, avoid backlight",
+      "back": "Stand behind the animal and fit the rump and hind legs",
+      "left": "Stand to the side so the whole body, head to tail, is in frame",
+      "right": "Same as the left side, from the other side of the animal"
+    },
+    "tip": "Tip",
+    "example": "Example",
+    "gallery": "Gallery",
+    "capture": "Capture",
+    "flash": {
+      "off": "Flash: Off",
+      "on": "Flash: On",
+      "auto": "Flash: Auto"
+    },
+    "close": "Close and discard photos",
+    "discardTitle": "Discard this check?",
+    "discardBody": "The photos you took will be deleted.",
+    "discard": "Discard",
+    "keep": "Keep going",
+    "checking": "Checking photo…",
+    "good": "Good",
+    "retake": "Retake",
+    "useAnyway": "Use anyway",
+    "issues": {
+      "blurry": "Image is blurry – retake",
+      "too_dark": "Too dark – retake in better light",
+      "too_bright": "Too bright – avoid direct sun or glare",
+      "too_small": "Photo is too small – retake",
+      "not_cattle": "Not a cow or buffalo"
+    },
+    "qualityError": "Couldn't check this photo. You can still use it.",
+    "teethGuide": "Good example",
+    "teethTip1": "Lift the lip gently",
+    "teethTip2": "Show the front teeth clearly",
+    "teethTip3": "Use flash if dark",
+    "teethHint": "Fit the mouth inside the outline",
+    "permissionTitle": "Camera access needed",
+    "permissionBody": "MaweshiAI needs the camera to photograph the animal. You can also pick photos from the gallery.",
+    "permissionAllow": "Allow camera",
+    "permissionSettings": "Open settings",
+    "reviewTitle": "Review photos",
+    "reviewSub": "Tap a photo to retake it",
+    "retakeBanner_one": "Retake {{count}} photo for a more accurate report",
+    "retakeBanner_other": "Retake {{count}} photos for a more accurate report",
+    "analyze": "Analyze Animal",
+    "analyzeAnywayTitle": "Analyze with weak photos?",
+    "analyzeAnywayBody": "Some photos have problems. The report will be less accurate.",
+    "analyzeAnyway": "Analyze anyway",
+    "processingTitle": "Checking your animal…",
+    "processingTime": "This takes about 20 seconds",
+    "keepOpen": "Please keep the app open.",
+    "steps": {
+      "species": "Species check",
+      "breed": "Breed identification",
+      "age": "Age estimation",
+      "health": "Health check (FMD)",
+      "report": "Generating report"
+    },
+    "stepState": {
+      "waiting": "Waiting",
+      "working": "Working",
+      "done": "Done",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    },
+    "stepHints": {
+      "species": "Cow or buffalo",
+      "breed": "From the body photos",
+      "age": "Reading the teeth…",
+      "health": "Mouth, skin and hooves",
+      "report": "For: {{purpose}}"
+    },
+    "uploading": "Uploading photos…",
+    "failedTitle": "The check couldn't finish",
+    "failedBody": "Something went wrong while checking the animal. Your photos are still here; try again.",
+    "wrongTitle": "This doesn't look like a cow or buffalo",
+    "wrongBody": "MaweshiAI checks cattle and buffalo only. Please take a clear photo of the animal you want to buy.",
+    "wrongTip": "Stand back so the full animal is in frame",
+    "retakePhoto": "Retake photo",
+    "seeTips": "See photo tips"
   }
 }

@@ -1,5 +1,6 @@
 import { Check } from "lucide-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
+import { useDirection } from "../hooks/useDirection";
 import { borders, colors, radii, shadows, touch } from "../theme";
 import AppText from "./AppText";
 
@@ -14,6 +15,8 @@ export function IconTile({ icon: Icon, size = 56, bg = colors.primaryTint, color
 
 // Radio-style card: 3dp green border, tinted background, shadow and a check badge when selected
 export function SelectCard({ selected, onPress, children, style, accessibilityLabel }) {
+  // Physical side chosen by language: RN on phones never swaps left/right, and RN-web doesn't flip start/end
+  const { rtl } = useDirection();
   return (
     <Pressable
       accessibilityRole="radio"
@@ -28,7 +31,7 @@ export function SelectCard({ selected, onPress, children, style, accessibilityLa
       ]}
     >
       {children}
-      <View style={styles.badgeSlot} pointerEvents="none">
+      <View style={[styles.badgeSlot, rtl ? { left: 12 } : { right: 12 }]} pointerEvents="none">
         {selected ? (
           <View style={styles.checkBadge}>
             <Check size={18} color={colors.white} strokeWidth={3} />
@@ -124,7 +127,7 @@ const styles = StyleSheet.create({
   selectCard: { backgroundColor: colors.surface, borderRadius: radii.card, padding: 16 },
   selectCardOff: { borderWidth: borders.default, borderColor: colors.border },
   selectCardOn: { borderWidth: borders.selected, borderColor: colors.primary, backgroundColor: colors.primaryTintSoft },
-  badgeSlot: { position: "absolute", top: 12, end: 12 },
+  badgeSlot: { position: "absolute", top: 12 },
   checkBadge: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
   emptyRing: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: colors.iconInactive },
   chip: {

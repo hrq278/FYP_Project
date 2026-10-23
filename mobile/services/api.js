@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const TOKEN_KEY = "token";
@@ -35,5 +36,43 @@ export const saveSettings = async (payload) => (await api.put("/api/auth/setting
 export const logoutUser = async () => (await api.post("/api/auth/logout")).data;
 
 export const listEvaluations = async (params = {}) => (await api.get("/api/evaluations", { params })).data;
+
+// Phones upload a file by uri; the browser (used for layout checks) needs a Blob
+const appendImage = async (form, field, uri) => {
+  if (Platform.OS === "web") {
+    const blob = await (await fetch(uri)).blob();
+    form.append(field, blob, `${field}.jpg`);
+  } else {
+    form.append(field, { uri, name: `${field}.jpg`, type: "image/jpeg" });
+  }
+};
+
+// Quality check (+ species pre-check for the front photo) for one capture screen
+export const checkPhoto = async (uri, view) => {
+  const form = new FormData();
+  await appendImage(form, "image", uri);
+  form.append("view", view);
+  return (await api.post("/api/evaluations/quality", form, { headers: { "Content-Type": "multipart/form-data" }, timeout: 30000 })).data;
+};
+
+/**
+ * Starts an evaluation: 5 photos + purpose form. Returns { id, reportId, status }.
+ * @param {object} p { photos: { front, back, left, right, teeth } (uris), purpose, budget, sellerPrice, experience, language, quality }
+ */
+export const createEvaluation = async ({ photos, purpose, budget, sellerPrice, experience, language, quality }) => {
+  const form = new FormData();
+  for (const view of ["front", "back", "left", "right", "teeth"]) {
+    await appendImage(form, view, photos[view]);
+  }
+  form.append("purpose", purpose);
+  form.append("experience", experience);
+  form.append("language", language);
+  if (budget) form.append("budget", String(budget));
+  if (sellerPrice) form.append("sellerPrice", String(sellerPrice));
+  if (quality) form.append("quality", JSON.stringify(quality));
+  return (await api.post("/api/evaluations", form, { headers: { "Content-Type": "multipart/form-data" }, timeout: 60000 })).data;
+};
+
+export const getEvaluation = async (id) => (await api.get(`/api/evaluations/${id}`)).data.evaluation;
 
 export default api;

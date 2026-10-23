@@ -253,7 +253,7 @@ Tasks:
 
 ---
 
-## Module 5 — Mobile: analysis flow (Purpose → Capture → Review → Processing)
+## Module 5 — Mobile: analysis flow (Purpose → Capture → Review → Processing) ✅ Done 2026-10-23
 
 Tasks:
 - A `useCheckFlow` store (Zustand or React context) holding purpose form + 5 images + quality results across screens.

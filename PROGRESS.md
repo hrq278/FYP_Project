@@ -4,6 +4,36 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 5 — Mobile: analysis flow (2026-10-23)
+
+**Status:** done (verified end to end in the browser with real backend + ML service; not yet on a physical phone).
+
+### What was done
+- `src/context/CheckFlowContext.js`: state for one check (purpose, budget, seller's price, experience, 5 photos with their quality and species results, retake mode, evaluation id); Pakistani number formatting (`2,50,000`).
+- `src/utils/photo.js`: compress every photo to max 1280 px, JPEG 0.8 (`expo-image-manipulator`).
+- `services/api.js`: `checkPhoto` (`POST /api/evaluations/quality`), `createEvaluation` (5 photos + form), `getEvaluation`; uploads use a uri on phones and a Blob on web.
+- Screens (`app/check/`):
+  - `purpose`: 2×3 purpose cards (Milk default), optional budget and seller's price in PKR, experience toggle.
+  - `capture/[view]`: one screen for front/back/left/right/teeth: `expo-camera` live preview, 5-step stepper, dashed silhouette per view (right = mirrored left), amber corner brackets, tip card with example, Gallery / Capture / Flash (off → auto → on). After a photo: compress → quality check (+ species pre-check on the front photo) → good photos move on automatically; weak ones get an inline "Retake / Use anyway"; not cow/buffalo → wrong-image screen; check failing (offline) → "use anyway". Camera permission screen with "Allow" or "Open settings". Close asks to discard (own `ConfirmDialog`, since RN `Alert` does nothing on web).
+  - Teeth step: guide card (lower-jaw drawing + 3 tips), mouth outline, hint pill, flash on by default.
+  - `review`: 2-column grid, teeth across both columns, Good / blurred "Retake" tiles, warning banner with count, tap to retake one photo (returns to Review), Analyze confirms when photos are weak.
+  - `processing`: uploads, then polls every 1.5 s and renders `steps[]` live (done / working spinner / waiting) with server summaries ("Cow (60%)", "Possibly Vechur", "~5 years"); progress bar; Cancel back to Review; done → `report/[id]`; rejected → wrong image; failed → retry screen.
+  - `wrong-image` (spec §5.2): Retake photo / See photo tips (opens onboarding, which now returns instead of going to Login when signed in).
+- Overlays added to `Illustrations.jsx`: `CaptureOverlay` (front, back, side), `MouthOverlay`, `CornerBrackets`. All strings in English and Urdu.
+
+### How it was tested (Playwright + Chrome with a fake camera, real backend on Atlas + ML service)
+- Full run: Purpose (Qurbani, PKR 2,50,000 / 3,10,000) → 5 photos via Gallery (Gir cow, Holstein, blurred Hereford, black-and-white cow, real teeth photo) → blurred photo got "Image is blurry – retake" → Use anyway → Review showed 1 warning tile and banner → confirm dialog → Processing showed live steps → report route in **10.9 s**. Photos checked in 22.8 s total.
+- Goat as front photo → wrong-image screen (species pre-check), no evaluation created.
+- Urdu: purpose, camera, teeth and wrong-image screens mirror correctly; fixed badge placement on cards (RN-web doesn't flip `start`/`end` on absolute positions; now physical side by language, which also matches phones).
+- Android bundle builds; no page errors.
+- Test data added in Atlas: one evaluation for `claude-m2-1792756718@example.com`.
+
+### Open items
+- Try the live camera, flash and permission flow on a real Android phone (Expo Go).
+- Offline queue for photos (spec §5.1 "No internet") is Module 8.
+
+---
+
 ## Module 4 — Mobile foundation: theme, components, i18n, auth screens (2026-10-23)
 
 **Status:** done (verified by rendering on web at phone size; not yet on a physical phone).
