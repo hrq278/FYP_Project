@@ -46,8 +46,7 @@ Also make sure your current IP is allowed under Atlas → **Network Access**.
 Everything so far was checked in a browser at phone size. On a phone, check:
 - fonts (English and Urdu) and switching language (the app restarts once into right-to-left);
 - the live camera, flash, the camera-permission prompt and Gallery;
-- keyboard covering inputs on Login, Register and Purpose.
-
+- keyboard covering inputs on Login, Register and Purpose;
 - the report screen's **Download PDF** (opens the share sheet with the PDF), **Share on WhatsApp**, and **Listen** on chat answers (uses the phone's text-to-speech; Urdu needs an Urdu voice installed in Android settings).
 
 Steps: fix item 3, start ML service + backend + `cd mobile && npx expo start`, scan the QR code with Expo Go. Tell Claude anything that looks wrong (a screenshot helps).
