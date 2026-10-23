@@ -6,7 +6,7 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ## Module 0 — Repo setup and fixes (2026-10-23)
 
-**Status:** done locally; GitHub push pending (repo URL and git identity needed).
+**Status:** done. Pushed to https://github.com/hrq278/FYP_Project (branch `main`).
 
 ### What was done
 - Docs moved: `reportnow.md` → `docs/STATUS_2026-10-23.md`, `report.md` → `docs/REPORT_2026-04-24.md`, `MAWESHIAI_BUILD_PLAN.md` → `BUILD_PLAN.md`. Created `docs/design/` (design PDF not yet added).
@@ -44,7 +44,6 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 Not tested: screens on a real phone (no device connected).
 
 ### Open questions / notes
-- **GitHub:** need the repository URL (the `gh` CLI is not installed) and the git author name/email for commits.
 - **Design PDF** `docs/design/MaweshiAI.pdf` is needed before Module 4.
 - `mobile/.env` still has the old IP `192.168.100.129`; set it to the PC's current LAN IP before using Expo Go.
 - Module 1 inputs now known: breed metadata (in `ml-service/model/`), age project at `F:\FYP\Models\Age Detection` (PyTorch, 5-fold checkpoints; final model to be selected/exported), FMD spec (Hugging Face `xprotocol/EfficientNet-B3-Cattle-Disease`).
