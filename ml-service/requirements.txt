@@ -1,0 +1,13 @@
+fastapi==0.161.0
+uvicorn==0.54.0
+python-multipart==0.0.32
+tensorflow==2.21.0
+keras==3.15.1
+tf_keras==2.21.0
+tensorflow-hub==0.16.1
+# tensorflow-hub imports pkg_resources, which setuptools 81+ no longer ships
+setuptools==80.10.2
+h5py==3.14.0
+numpy==2.5.4
+opencv-python==5.0.0.93
+pillow==13.0.0

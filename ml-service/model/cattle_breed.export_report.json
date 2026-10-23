@@ -1,0 +1,69 @@
+{
+  "source_checkpoint": "B:\\FYP\\Models\\Breed\\cattle-breed-classification-dataset\\runs\\resnet18_thesis\\best_model.pt",
+  "source_sha256": "69deba16a7ce1e48ca4d15300637bbb0047fb763e5f30973d018075ae9bbb29d",
+  "best_epoch": 10,
+  "validation_macro_f1_from_training": 0.7106997220643688,
+  "conversion_only_not_retraining": true,
+  "smoke_test": false,
+  "input": {
+    "shape": [
+      null,
+      224,
+      224,
+      3
+    ],
+    "dtype": "float32",
+    "layout": "NHWC",
+    "values": "ImageNet-normalized RGB"
+  },
+  "output": "15 softmax probabilities in labels.json order",
+  "transferred_tensors": 102,
+  "parity_inputs": 17,
+  "validation_sample_paths": [
+    "val/ayrshire/DS02__Ayrshire_109.jpg",
+    "val/brown-swiss/DS03__Brown_Swiss_103.jpg",
+    "val/gir/DS02__Gir_109.jpg",
+    "val/holstein-friesian/DS03__Holstein_Friesian_1.jpg",
+    "val/jaffarabadi/DS01__10_Most_Expensive_Buffalo_Breeds_in_the_.jpg",
+    "val/jersey/DS03__Jersey_111.jpg",
+    "val/kankrej/DS02__Kankrej_107.jpg",
+    "val/nagori/DS02__image_168x300_10.jpg",
+    "val/nili-ravi/DS01__2_Buffalo_nille_Ravi_for_sale_muridke_.jpg",
+    "val/rathi/DS02__00000011__aug1_rathi_7.jpg",
+    "val/red-sindhi/DS02__Red_Sindhi_116.jpg",
+    "val/sahiwal/DS02__Sahiwal_100.jpg",
+    "val/tharparkar/DS02__Tharparkar_139.jpg",
+    "val/umblachery/DS02__image_225x225_23.jpg",
+    "val/vechur/DS02__00000031.jpg"
+  ],
+  "synthetic_inputs": 2,
+  "preprocessing_matches_torchvision": true,
+  "max_abs_logit_difference": 1.1980533599853516e-05,
+  "reload_checks": {
+    "cattle_breed.keras": {
+      "max_abs_probability_difference": 1.0579824447631836e-06,
+      "top1_matches": 17
+    },
+    "cattle_breed.weights.h5": {
+      "max_abs_probability_difference": 1.0579824447631836e-06,
+      "top1_matches": 17
+    },
+    "cattle_breed.weight.h5": {
+      "max_abs_probability_difference": 1.0579824447631836e-06,
+      "top1_matches": 17
+    }
+  },
+  "versions": {
+    "tensorflow": "2.21.0",
+    "keras": "3.12.1",
+    "h5py": "3.14.0",
+    "numpy": "2.2.5",
+    "pillow": "11.1.0"
+  },
+  "note": "Numerical conversion parity is not a new accuracy evaluation. No test images were used.",
+  "file_sha256": {
+    "cattle_breed.keras": "b55c53f7f9454c3ecdb59e970245af3d5f2b25e1062117af3168c59a4000db81",
+    "cattle_breed.weight.h5": "052b4d1de8e5c925e2ecf0ca1f996836664b2200447f951954bc8095e9dd8073",
+    "cattle_breed.weights.h5": "5851e857bce006113bacefec15feba69bbe405404fbc5b1ff51a51850ca76c60"
+  }
+}

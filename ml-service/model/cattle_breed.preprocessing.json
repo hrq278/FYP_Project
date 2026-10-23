@@ -1,0 +1,34 @@
+{
+  "image_size": 224,
+  "resize_size": 256,
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "interpolation": "bilinear",
+  "antialias": true,
+  "color_mode": "RGB",
+  "exif_transpose": true,
+  "alpha_background": "white",
+  "eval_crop": "center",
+  "train_crop_scale": [
+    0.8,
+    1.0
+  ],
+  "train_crop_ratio": [
+    0.75,
+    1.3333333333333333
+  ],
+  "horizontal_flip": 0.5,
+  "color_jitter": {
+    "brightness": 0.1,
+    "contrast": 0.1,
+    "saturation": 0.1
+  }
+}

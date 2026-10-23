@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "MaweshiAI",
+    "slug": "maweshiai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      "expo-image-picker"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
