@@ -4,6 +4,15 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Plan update — UI spec and decisions (2026-10-23)
+
+- Added `docs/design/MaweshiAI_UI_Spec.md` (UI spec) next to `docs/design/MaweshiAI.pdf`.
+- `BUILD_PLAN.md` §0.1 **Decisions** added: email/password login now (OTP + Google → Module 10), Cow/Buffalo wording, species-gated breed model + LLM breed verification from a side photo, age model from the team's PyTorch project via ONNX, EfficientNet-B3 health baseline with Lumpy Skin as an extra result, Claude Haiku 5.5 as the LLM, Cloudinary for images, Profile designed from the system.
+- Modules 1–7 and 10 updated to match. Cloudinary credentials confirmed present in `backend/.env`.
+- Still needed: `LLM_API_KEY` in `backend/.env` before Module 2/3.
+
+---
+
 ## Module 0 — Repo setup and fixes (2026-10-23)
 
 **Status:** done. Pushed to https://github.com/hrq278/FYP_Project (branch `main`).
@@ -44,7 +53,6 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 Not tested: screens on a real phone (no device connected).
 
 ### Open questions / notes
-- **Design PDF** `docs/design/MaweshiAI.pdf` is needed before Module 4.
 - `mobile/.env` still has the old IP `192.168.100.129`; set it to the PC's current LAN IP before using Expo Go.
 - Module 1 inputs now known: breed metadata (in `ml-service/model/`), age project at `F:\FYP\Models\Age Detection` (PyTorch, 5-fold checkpoints; final model to be selected/exported), FMD spec (Hugging Face `xprotocol/EfficientNet-B3-Cattle-Disease`).
 - Breed model quick check: Holstein photo → Jersey 59% (Holstein 2nd); water buffalo → Brown Swiss 85%. Plan for Module 1: species-gated breed list, multi-view averaging, "uncertain" below threshold, LLM breed verification from a side photo (team decision 2026-10-23).
