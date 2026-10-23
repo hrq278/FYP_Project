@@ -164,7 +164,7 @@ Tasks:
 
 ---
 
-## Module 2 — Backend: evaluation pipeline and rules
+## Module 2 — Backend: evaluation pipeline and rules ✅ Done 2026-10-23
 
 **Goal:** the backend accepts the full 5-photo evaluation, orchestrates the models, applies safety rules, and stores everything.
 

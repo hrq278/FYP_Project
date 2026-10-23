@@ -4,6 +4,55 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 2 — Backend: evaluation pipeline and rules (2026-10-23)
+
+**Status:** done. One config fix needed: `CLOUDINARY_CLOUD_NAME` in `backend/.env` is `FYP_Project`, which Cloudinary rejects ("Invalid cloud_name"); it must be the dashboard's cloud name code. Until then photos aren't stored (the analysis still completes).
+
+### What was done
+- `backend/app.js` (Express app, used by tests) split from `server.js` (DB + listen).
+- New `models/Evaluation.js` per the plan's schema (owner `userId` or `guestId`, status, purpose form, Cloudinary images, steps, raw results incl. `breedVerification`, verdict, score + breakdown, report, `reportId` `MW-YYMMDD-NNNN`, `legacy` flag).
+- Services:
+  - `mlClient.js`: one function per ML endpoint; no response → 503, ML 400 → 400.
+  - `storage.js`: Cloudinary upload/delete (`maweshiai/evaluations/<id>/<view>`).
+  - `pipeline.js`: background run species → breed (+ LLM check) → age → health → report, updating `steps[]` after each; uploads run in parallel and an upload failure doesn't fail the analysis; not-cattle stops early as `rejected` / `not_cattle`; ML down → `failed` / `ml_unavailable`.
+  - `rules.js`: deterministic score = purpose fit 40 + age 25 + health 25 + confidence 10, verdict ≥70 / ≥45; caps: FMD or lumpy → not recommended (≤25); health uncertain → at best caution; Qurbani under 2 years → not recommended, uncertain age → caution + "do daant" check; any core confidence < 0.6 → at best caution; seller price > budget + 20 % → risk.
+  - `breed.js`: model + LLM reconciliation (agree / LLM-only breed / disagree → "possibly").
+  - `report.js`: template report from the rules (summary, reasons, risks, purpose fit, practical checks) used until the LLM report (Module 3) and as its fallback.
+  - `breedKnowledge.js`: reads `data/breeds.json` (Module 3); missing breeds score "unknown" (neutral).
+  - `llm.js`: interface only (`isConfigured`, `verifyBreed`, `generateReport`); returns nothing until Module 3 and `LLM_API_KEY`.
+- Endpoints: `POST /api/evaluations/quality`, `POST /api/evaluations` (202 + id), `GET /api/evaluations/:id` (owner only), `GET /api/evaluations?verdict=&q=&page=`, `DELETE /api/evaluations/:id`, `POST /api/auth/guest` (30-day guest token; profile/settings → 403 for guests). `POST /api/evaluate` (legacy) kept working, saved as `legacy: true` and hidden from the new history.
+- Shared `middleware/upload.js` (8 MB, JPEG/PNG/WebP, multer errors → 400).
+- Dependencies: `cloudinary`, `@anthropic-ai/sdk` (for Module 3), `zod`; dev: `jest`, `supertest`, `mongodb-memory-server`.
+
+### How it was tested
+- `npm test`: **38 passed** (rules unit tests incl. FMD, lumpy, Qurbani, low confidence, price; breed reconciliation; API: full 5-photo flow to `done`, rejected path, FMD and Qurbani verdicts, ML down, upload failure, missing photos, bad purpose, non-image files, owner-only access, history filters/search, delete with photo cleanup, quality pre-check, guest mode, legacy endpoint).
+- **Live run** (real ML service, Atlas, Cloudinary): 5 photos + Qurbani + seller price 30 % over budget → `done` in **9.7 s** with live step updates; verdict Caution 65/100 with flags `qurbani_age_unclear`, `low_confidence`, `age_uncertain`, `over_budget`. Goat front photo → quality pre-check `isCattle: false`; full submission → `rejected / not_cattle`. History and verdict filter correct. Cloudinary upload failed on the cloud name (above).
+- Test records left in Atlas: account `claude-m2-1792756718@example.com` with 2 evaluations.
+
+---
+
+## Model accuracy work (2026-10-23)
+
+Every change measured on photos the models weren't trained on (sources and scripts below). Public datasets may partly overlap training data, so numbers are reported per source.
+
+| Model | Change | Before → after | Evidence |
+|---|---|---|---|
+| Age | 5-fold ensemble (team's `cpu_mobilenetv3` folds, exported with the team's `AgeExport`) + flip/zoom test-time views | exact 33.6 → 39.6 %, ±1 year 72.6 → 77.1 %, MAE 1.37 → 1.21 y; when not flagged uncertain MAE 0.74, ±1 88 % | 449 holdout photos, `scripts/eval_age.py` |
+| Age | Teeth blur threshold 32.8 → 16 (5th percentile) | photos accepted 67 % → 91 %, same accuracy (the "blurry" ones had MAE 1.14) | same |
+| Species | Cow vs buffalo from ImageNet's ox / water-buffalo split, cut-off 0.10 (species model returned but weight 0) | 69.5 % → 90.5 % (buffalo 91.4 %, cow 90.3 %) | 968 labelled photos (185 buffalo), consistent on both sources |
+| Cattle gate | Flip averaging, threshold 0.05 → 0.02 | cattle wrongly rejected 5.8 → 3.0 %; non-cattle accepted 2/35 (unchanged) | 968 cattle + 35 non-cattle, `scripts/threshold_study.py` |
+| Breed | Center + full-frame views + flips | dairy set 79.4 → 88.7 %; independent set 27.3 → 26.3 % (≈15 animals) | `scripts/eval_breed.py` on Hugging Face sets |
+| Health | Flip averaging | equal or better on every set (lumpy set 91.5 → 93.6 %) | `scripts/eval_health.py`; 93–97 % top-1 on 4 external sets, sick called healthy 0–9 % |
+| Speed | `tf.function` for all Keras models; TF Hub species model always run with batch 2 (720 ms → 30 ms) | ML time per evaluation ~8 s → ~1.6 s | timing runs |
+
+Also: the 128 MB health model and the 84 MB age ensemble are stored in **Git LFS**.
+
+**Data sources used for evaluation (not committed):** Hugging Face `SynthAIzer/indian-cattle-buffalo-breeds` (test split, 1–2 source photos per breed, augmented), `Priya012005/CowBuffaloBreed` (4 dairy breeds, likely overlaps the breed model's training source); GitHub `11Adars/Mini-Project-Cattle-Disease-Detection`, `tleeds1/Cattle-disease-detection-app`, `Abdo965/AI-LLM-Based-Disease-Detection-for-Cows`, `SuryaGudipati21/Cattle-Disease-Detection`, `shubh-07-lk/Detection-of-FMDV-using-Computer-Vision-Algorithm`; age project's holdout split (local).
+
+**Still weak:** the breed model on genuinely new photos (independent set 26 %; Sahiwal, Gir, Tharparkar 0/9). The LLM breed check (decision 3, Module 3) is the main remedy; retraining with Pakistani breeds is in Module 10.
+
+---
+
 ## Module 1 — ML service: all four models (2026-10-23)
 
 **Status:** done. `/explain` (Grad-CAM, optional) deferred, see open items.

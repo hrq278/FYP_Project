@@ -79,7 +79,15 @@ Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to `http://<your PC's LAN IP>:30
 | GET | `/api/auth/profile` | Bearer | |
 | PUT | `/api/auth/settings` | Bearer | `{ preferredLanguage, alertsEnabled }` |
 | POST | `/api/auth/logout` | Bearer | |
-| POST | `/api/evaluate` | Bearer | multipart `bodyImage` (JPEG/PNG/WebP, ≤ 8 MB) → `{ species, confidence, createdAt }`; 400 for bad images, 503 if the ML service is down |
+| POST | `/api/auth/guest` | — | → `{ token, guest: true, guestId }` (30 days; profile/settings return 403 for guests) |
+| POST | `/api/evaluations/quality` | Bearer | multipart `image` + `view` (front/back/left/right/teeth) → `{ quality: { ok, issues }, species }` (species pre-check on the front photo only) |
+| POST | `/api/evaluations` | Bearer | multipart `front, back, left, right, teeth` + `purpose` (milk/breeding/qurbani/meat/farm_work/other), optional `budget`, `sellerPrice` ("2,50,000" accepted), `experience`, `language`, `quality` (JSON) → **202** `{ id, reportId, status: "processing" }` |
+| GET | `/api/evaluations/:id` | Bearer (owner) | `{ evaluation }`: `status` (processing/done/failed/rejected), `steps[]`, `results`, `verdict`, `score`, `scoreBreakdown`, `report`, `images` (Cloudinary URLs). Poll every 1.5 s while processing |
+| GET | `/api/evaluations?verdict=&q=&page=` | Bearer | History, newest first, 20 per page: `{ items: [{ id, reportId, status, purpose, verdict, score, species, breed, thumbnail, createdAt }], total }` |
+| DELETE | `/api/evaluations/:id` | Bearer (owner) | Deletes the evaluation and its Cloudinary photos |
+| POST | `/api/evaluate` | Bearer | Legacy single photo: multipart `bodyImage` → `{ species, confidence, createdAt }` (kept for the current app until Module 5) |
+
+Backend tests: `cd backend && npm test` (Jest + Supertest, in-memory MongoDB; ML service and Cloudinary mocked).
 
 ### ML service (port 8000)
 

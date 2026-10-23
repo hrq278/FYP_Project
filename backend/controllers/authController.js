@@ -1,9 +1,17 @@
+const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const createToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+};
+
+// Guests get a random id; their history list lives on the device, the server only keeps the evaluations
+const guestLogin = async (req, res) => {
+  const guestId = `guest_${crypto.randomUUID()}`;
+  const token = jwt.sign({ guestId, guest: true }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return res.status(201).json({ token, guest: true, guestId });
 };
 
 const registerUser = async (req, res) => {
@@ -122,6 +130,7 @@ const logoutUser = async (req, res) => {
 };
 
 module.exports = {
+  guestLogin,
   registerUser,
   loginUser,
   getProfile,
