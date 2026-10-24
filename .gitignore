@@ -31,3 +31,6 @@ ml-service/model/*.weights.h5
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Built Android app (download link in DEMO.md)
+/apk/

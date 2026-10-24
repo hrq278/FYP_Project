@@ -4,6 +4,17 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Installable Android app (APK) (2026-10-24)
+
+- **APK built** with EAS (Expo cloud, free plan): project `@hrq278/maweshiai`, profile `preview`, version 1.0.0. Download: https://expo.dev/artifacts/eas/GVGThvkifZvE6EGJMgY8atMePNB7pt_PftYYtMll1b4.apk (copy kept in `apk/`, git-ignored). Expo generated and stores the signing key.
+- No deployment needed: the APK talks to the backend on the laptop over the same Wi-Fi / phone hotspot. Because the laptop's address changes per network, the app now has a **Server address** screen (login "Change" link, Profile row) with a connection test; the start window prints the address to type.
+- Android settings: package `com.maweshiai.app`, plain-HTTP allowed (`expo-build-properties`), camera permission text, real icon and splash.
+- EAS Update configured (channel `preview`, runtime = app version): the language switch restarts the app properly in a release build, and JavaScript fixes can be published to installed phones with `eas update --channel preview` without a new APK.
+- `.easignore` uploads only the mobile app (129 MB → 1.5 MB per build).
+- Not yet tried on a phone (FIXES.md item 2).
+
+---
+
 ## Module 10 — Demo setup on this PC (deployment deferred) (2026-10-24)
 
 **Status:** done for the demo setup. The team decided not to deploy for now (no budget): the project runs on this PC and is used for demos. Deployment, the APK (EAS build) and the optional extras (OTP / Google login, on-device model, weight estimation, retrained models) stay open in BUILD_PLAN.md.

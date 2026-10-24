@@ -17,7 +17,8 @@ Without it, reports use the rule-based template and chat is unavailable. Everyth
 
 ## 2. Test on a real Android phone (Expo Go)
 
-Everything so far was checked in a browser at phone size. Start the app with `START_MaweshiAI.bat` and connect the phone as described in `DEMO.md` ("Show it on a phone"). On the phone, check:
+Everything so far was checked in a browser at phone size. Install the APK (`DEMO.md`, "installed app (APK)"), start `START_MaweshiAI.bat`, set the server address in the app if asked, and check:
+- the app icon, splash screen and the Server address screen ("Connected to MaweshiAI");
 - fonts (English and Urdu) and switching language (the app restarts once into right-to-left);
 - the live camera, flash, the camera-permission prompt and Gallery;
 - keyboard covering inputs on Login, Register and Purpose;
@@ -27,7 +28,7 @@ Everything so far was checked in a browser at phone size. Start the app with `ST
 - **large text**: Android Settings → Display → Font size to the largest, then look at Home, Purpose, the report and History;
 - the report screen's **Download PDF** (opens the share sheet with the PDF), **Share on WhatsApp**, and **Listen** on chat answers (uses the phone's text-to-speech; Urdu needs an Urdu voice installed in Android settings).
 
-The app icon and splash screen only show in an installed build (APK), not inside Expo Go; that needs an EAS build, skipped while the project isn't deployed. Tell Claude anything that looks wrong (a screenshot helps).
+Tell Claude anything that looks wrong (a screenshot helps); small fixes can then be sent to the installed app without a new APK.
 
 ## 3. The QR code / WhatsApp link only opens near the laptop
 

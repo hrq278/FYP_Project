@@ -23,7 +23,7 @@ Photos: on a laptop, use **Gallery** on each camera screen to pick photos from t
 
 ## Show it on a phone: installed app (APK), recommended
 
-1. Install the MaweshiAI APK on the phone (open the download link from the build on the phone, allow "install unknown apps" once). It shows the real app icon and works like any app.
+1. Install the MaweshiAI APK on the phone: open the latest build at https://expo.dev/accounts/hrq278/projects/maweshiai/builds on the phone and tap *Install*, or copy `apk/MaweshiAI-1.0.0.apk` from this PC to the phone (USB / WhatsApp to yourself) and open it. Allow "install unknown apps" once. It shows the real app icon and works like any app.
 2. Connect the phone and the laptop to the **same network**. Easiest: turn on the **phone's hotspot** and connect the laptop to it (the laptop then also gets internet from the phone).
 3. Double-click **START_MaweshiAI.bat**. When it says READY it shows a yellow address, e.g. `192.168.43.12:3000`.
 4. Open MaweshiAI on the phone. If the login screen can't reach the server, tap **Change** at the bottom of the login screen (or Profile → *Server address*), type the yellow address, tap **Save**. It says "Connected to MaweshiAI". The phone remembers it until the network changes.
