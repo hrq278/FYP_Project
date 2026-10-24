@@ -427,5 +427,18 @@
     "deleteTitle": "Delete this saved check?",
     "deleteBody": "Its 5 photos will be removed from this phone and the animal won't be checked.",
     "deleteConfirm": "Delete"
+  },
+  "server": {
+    "title": "Server address",
+    "intro": "The app gets its results from the MaweshiAI server running on the laptop. Type the address shown in the laptop's start window.",
+    "label": "Server address",
+    "test": "Test connection",
+    "save": "Save",
+    "reset": "Use the built-in address",
+    "ok": "Connected to MaweshiAI.",
+    "fail": "Can't reach MaweshiAI at this address. Check that the phone is on the same Wi-Fi or hotspot as the laptop and that the laptop app is running. The address was saved anyway.",
+    "invalid": "That doesn't look like an address. Example: 192.168.43.12:3000",
+    "help": "Phone hotspot tip: connect the laptop to this phone's hotspot, double-click START_MaweshiAI on the laptop, then type the address it shows here.",
+    "change": "Change"
   }
 }

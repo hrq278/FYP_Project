@@ -21,12 +21,22 @@ In Chrome press **F12**, then **Ctrl + Shift + M** and pick a phone (e.g. "iPhon
 
 Photos: on a laptop, use **Gallery** on each camera screen to pick photos from the PC. Keep a folder ready with 4 side photos and 1 teeth photo of the same animal.
 
-## Show it on a phone
+## Show it on a phone: installed app (APK), recommended
+
+1. Install the MaweshiAI APK on the phone (open the download link from the build on the phone, allow "install unknown apps" once). It shows the real app icon and works like any app.
+2. Connect the phone and the laptop to the **same network**. Easiest: turn on the **phone's hotspot** and connect the laptop to it (the laptop then also gets internet from the phone).
+3. Double-click **START_MaweshiAI.bat**. When it says READY it shows a yellow address, e.g. `192.168.43.12:3000`.
+4. Open MaweshiAI on the phone. If the login screen can't reach the server, tap **Change** at the bottom of the login screen (or Profile → *Server address*), type the yellow address, tap **Save**. It says "Connected to MaweshiAI". The phone remembers it until the network changes.
+5. The first time, Windows asks whether Node.js may use the network: tick **both Private and Public** and click **Allow**.
+
+**Make a new APK** (after changing the app): open a terminal in the `mobile` folder and run `npx eas-cli build -p android --profile preview`. It builds in Expo's cloud (free plan, about 15–30 minutes) and prints a download link / QR code. Log in first with `npx eas-cli login` if asked.
+
+## Show it on a phone: Expo Go (development)
+
+Useful while changing the app (changes appear on the phone straight away).
 
 1. Install **Expo Go** from the Play Store (it must support Expo SDK 54).
-2. Connect the phone to the **same Wi-Fi** as the laptop. On university Wi-Fi devices often can't see each other: turn on the **phone's hotspot** and connect the laptop to it, then double-click the start file again (the address changes).
-3. In Expo Go tap **Scan QR code** and scan the code in the *MaweshiAI - 3 App* window.
-4. The first time, Windows asks whether Node.js may use the network: tick **both Private and Public** and click **Allow**.
+2. Same network as the laptop (see above), start the file, then in Expo Go tap **Scan QR code** and scan the code in the *MaweshiAI - 3 App* window.
 
 ## Suggested 5-minute demo
 
@@ -47,7 +57,7 @@ Numbers to quote (from `docs/results/README.md`): cattle vs other animals 94 %, 
 | The start window says **PROBLEM** | Read the line under it; it says what is missing. |
 | "ML service did not start" | Look at window 1. Usually the PC is low on memory: close Chrome tabs and start again. |
 | "MongoDB connection failed" in window 2 | No internet, or this PC's IP isn't allowed in MongoDB Atlas → *Network Access* (add the current IP or 0.0.0.0/0 for demos). |
-| Phone: "Can't reach the server" / Expo Go can't load | Phone and laptop on different networks, or Windows Firewall blocked Node.js. Use the phone hotspot (see above) and allow Node.js in Windows Security → Firewall → *Allow an app*. |
+| Phone: "Can't reach the server" / Expo Go can't load | In the app, check *Server address* matches the yellow address in the start window. Otherwise the phone and laptop are on different networks, or Windows Firewall blocked Node.js. Use the phone hotspot (see above) and allow Node.js in Windows Security → Firewall → *Allow an app*. |
 | Expo Go says the project is for a different SDK | Update Expo Go from the Play Store. |
 | A check says "checking service is busy" | Window 1 (ML service) was closed or crashed: start again. |
 | Reports say "Generated from the check results" instead of AI text | Normal without an LLM key (FIXES.md item 1); everything else works. |

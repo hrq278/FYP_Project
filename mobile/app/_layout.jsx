@@ -20,6 +20,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SessionProvider } from "../src/context/SessionContext";
 import { loadLanguage } from "../src/i18n";
 import { PendingProvider } from "../src/offline/PendingContext";
+import { loadServerUrl } from "../services/api";
 import { colors } from "../src/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -39,7 +40,7 @@ export default function RootLayout() {
   // Apply the saved language before any screen renders, so deep links don't flash English
   const [languageLoaded, setLanguageLoaded] = useState(false);
   useEffect(() => {
-    loadLanguage().finally(() => setLanguageLoaded(true));
+    Promise.all([loadLanguage(), loadServerUrl()]).finally(() => setLanguageLoaded(true));
   }, []);
   const ready = (fontsLoaded || Boolean(fontError)) && languageLoaded;
 

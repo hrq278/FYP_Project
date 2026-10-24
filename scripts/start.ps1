@@ -107,8 +107,10 @@ Say ""
 Say "  READY" Green
 Say "  -----"
 Say "  On this PC : open http://localhost:8081 in Chrome (press F12, then Ctrl+Shift+M for phone size)"
-Say "  On a phone : install 'Expo Go', join the same Wi-Fi, scan the QR code in the window"
-Say "               'MaweshiAI - 3 App'. Backend address used by the app: $ApiUrl"
+Say "  Phone (APK): join the same Wi-Fi or hotspot as this PC, open MaweshiAI. If it can't connect,"
+Say "               tap 'Change' under the login form (or Profile > Server address) and type:"
+Say "               ${Ip}:3000" Yellow
+Say "  Phone (Expo Go): same Wi-Fi, scan the QR code in the window 'MaweshiAI - 3 App'."
 Say "  Demo login : demo@maweshiai.app  /  maweshi123   (or 'Continue as Guest')"
 Say "  To stop    : close the three MaweshiAI windows."
 Say ""

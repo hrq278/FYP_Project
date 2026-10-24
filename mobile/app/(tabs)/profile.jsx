@@ -1,6 +1,6 @@
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { Info, LogOut, ShieldCheck, Trash2, UserPlus } from "lucide-react-native";
+import { Info, LogOut, Server, ShieldCheck, Trash2, UserPlus } from "lucide-react-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -98,6 +98,7 @@ export default function Profile() {
         <View style={styles.rows}>
           <Row icon={Info} label={t("profile.about")} onPress={() => router.push("/about")} />
           <Row icon={ShieldCheck} label={t("profileFull.privacy")} onPress={() => router.push("/legal")} />
+          <Row icon={Server} label={t("server.title")} onPress={() => router.push("/server")} />
         </View>
 
         {error ? <View style={styles.gap}><InfoBanner variant="warning" text={error} /></View> : null}

@@ -1,0 +1,24 @@
+# Files EAS Build uploads for the Android app: only the mobile/ folder is needed.
+# (When this file exists EAS ignores .gitignore, so the usual exclusions are repeated here.)
+/backend/
+/ml-service/
+/docs/
+/scripts/
+/*.md
+/START_MaweshiAI.bat
+
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+/mobile/android/
+/mobile/ios/
+.env
+*/.env
+__pycache__/
+.venv*/
+*.part
+.DS_Store
+Thumbs.db
+desktop.ini

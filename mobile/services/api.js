@@ -3,13 +3,59 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const TOKEN_KEY = "token";
+const SERVER_KEY = "serverUrl";
+
+// The backend runs on the laptop, whose address changes with the network, so an installed app (APK) lets the
+// user set it (Server address screen). Default: the address the app was built or started with.
+export const DEFAULT_SERVER = process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000";
+let serverUrl = DEFAULT_SERVER;
+
+export const getServerUrl = () => serverUrl;
+
+export const loadServerUrl = async () => {
+  try {
+    serverUrl = (await AsyncStorage.getItem(SERVER_KEY)) || DEFAULT_SERVER;
+  } catch {
+    serverUrl = DEFAULT_SERVER;
+  }
+  return serverUrl;
+};
+
+// "192.168.43.12" -> "http://192.168.43.12:3000"; keeps an explicit scheme and port; null if it isn't an address
+export const normalizeServerUrl = (text) => {
+  let t = String(text || "").trim().replace(/\/+$/, "");
+  if (!/^https?:\/\//i.test(t)) t = `http://${t}`;
+  // A pattern, not URL(): React Native's URL can't read or set the host and port
+  const m = t.match(/^(https?):\/\/([a-z0-9.-]+)(?::(\d{1,5}))?$/i);
+  if (!m) return null;
+  const scheme = m[1].toLowerCase();
+  const port = m[3] || (scheme === "http" ? "3000" : "");
+  return `${scheme}://${m[2].toLowerCase()}${port ? `:${port}` : ""}`;
+};
+
+export const saveServerUrl = async (url) => {
+  serverUrl = url || DEFAULT_SERVER;
+  await AsyncStorage.setItem(SERVER_KEY, serverUrl);
+  return serverUrl;
+};
+
+// Resolves true if the MaweshiAI backend answers at this address within 5 s
+export const testServer = async (url) => {
+  try {
+    const res = await axios.get(`${url}/`, { timeout: 5000 });
+    return /MaweshiAI/i.test(JSON.stringify(res.data));
+  } catch {
+    return false;
+  }
+};
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL,
+  baseURL: DEFAULT_SERVER,
   timeout: 20000
 });
 
 api.interceptors.request.use(async (config) => {
+  config.baseURL = serverUrl;
   const token = await AsyncStorage.getItem(TOKEN_KEY);
   // A queued offline check sends the token it was saved with (see src/offline/pending.js)
   if (token && !config.headers.Authorization) {

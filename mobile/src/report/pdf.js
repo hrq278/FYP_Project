@@ -3,6 +3,7 @@ import { File } from "expo-file-system";
 import * as Print from "expo-print";
 import { Platform } from "react-native";
 import qrcode from "qrcode-generator";
+import { getServerUrl } from "../../services/api";
 
 const VERDICT = {
   recommended: { fill: "#1E7A3E", bg: "#F2F8F3", border: "#1E7A3E", icon: "✓" },
@@ -15,7 +16,7 @@ const esc = (s) =>
 
 // Online read-only copy of the report (backend /r/:reportId), opened by the QR code
 export const reportLink = (e) =>
-  e?.reportId && e?.shareKey ? `${process.env.EXPO_PUBLIC_API_BASE_URL}/r/${e.reportId}?k=${e.shareKey}` : null;
+  e?.reportId && e?.shareKey ? `${getServerUrl()}/r/${e.reportId}?k=${e.shareKey}` : null;
 
 export const qrSvg = (text, size = 84) => {
   if (!text) return "";

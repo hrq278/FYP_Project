@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import AppText from "../../src/components/AppText";
-import { BrandRow, GuestLink, OrDivider, TermsNote } from "../../src/components/AuthShared";
+import { BrandRow, GuestLink, OrDivider, ServerLink, TermsNote } from "../../src/components/AuthShared";
 import Button from "../../src/components/Button";
 import { InfoBanner, Screen } from "../../src/components/Layout";
 import TextField from "../../src/components/TextField";
@@ -105,6 +105,7 @@ export default function LoginScreen() {
         <GuestLink onPress={asGuest} disabled={Boolean(busy)} />
         <View style={styles.spacer} />
         <TermsNote />
+        <ServerLink />
       </Screen>
     </KeyboardAvoidingView>
   );

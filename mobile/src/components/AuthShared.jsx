@@ -1,7 +1,8 @@
-import { UserRound } from "lucide-react-native";
+import { Server, UserRound } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, View } from "react-native";
+import { getServerUrl } from "../../services/api";
 import { colors } from "../theme";
 import AppText from "./AppText";
 import { CattleHeadIcon } from "./Illustrations";
@@ -56,7 +57,23 @@ export function TermsNote() {
   );
 }
 
+// "Server: 192.168.43.12:3000 · Change" under the login form, for the installed app on a new network
+export function ServerLink() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  return (
+    <Pressable onPress={() => router.push("/server")} accessibilityRole="link" style={styles.server} hitSlop={6}>
+      <Server size={16} color={colors.textMuted} strokeWidth={2.4} />
+      <AppText variant="small" weight={500} color={colors.textMuted} latin>
+        {getServerUrl().replace(/^http:\/\//, "")}
+      </AppText>
+      <AppText variant="small" color={colors.primary} style={styles.underline}>{t("server.change")}</AppText>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  server: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 40, marginTop: 4 },
   brand: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 28 },
   logo: { width: 56, height: 56, borderRadius: 16, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },
   divider: { flexDirection: "row", alignItems: "center", gap: 12, marginVertical: 20 },

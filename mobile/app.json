@@ -17,7 +17,22 @@
           "imageWidth": 140
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "MaweshiAI uses the camera to photograph the animal you want to buy.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
@@ -30,7 +45,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1F5F3A"
-      }
+      },
+      "package": "com.maweshiai.app",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
