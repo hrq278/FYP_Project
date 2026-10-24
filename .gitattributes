@@ -1,2 +1,4 @@
 ml-service/model/health/*.keras filter=lfs diff=lfs merge=lfs -text
 ml-service/model/age/age_ensemble.onnx filter=lfs diff=lfs merge=lfs -text
+*.bat text eol=crlf
+*.ps1 text eol=crlf

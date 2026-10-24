@@ -118,6 +118,8 @@ const urReport = ({ purpose, species, breed, age, health, rules, budget, sellerP
   if (flags.includes("low_confidence")) risks.push("AI کو کچھ نتائج پر یقین کم ہے: اچھی روشنی میں صاف تصویریں دوبارہ لیں۔");
   if (flags.includes("age_uncertain")) risks.push("عمر کا اندازہ یقینی نہیں: سامنے کے دانت خود چیک کریں۔");
   if (flags.includes("teeth_photo_quality")) risks.push("دانتوں کی تصویر صاف نہیں تھی؛ عمر کا اندازہ غلط ہو سکتا ہے۔");
+  if (flags.includes("too_old_for_purpose")) risks.push(`تقریباً ${age?.age_years} سال کی عمر ${forPurpose} کے لیے زیادہ ہے: کارآمد سال کم باقی ہیں؛ دانت اور تھن یا جسم کی حالت خود دیکھیں۔`);
+  if (flags.includes("too_young_for_purpose")) risks.push(`تقریباً ${age?.age_years} سال کی عمر ${forPurpose} کے لیے کم ہے: کارآمد ہونے میں وقت لگ سکتا ہے۔`);
   if (flags.includes("over_budget") && budget > 0) {
     risks.push(`بیچنے والے کی قیمت آپ کے بجٹ سے ${Math.round(((sellerPrice - budget) / budget) * 100)}% زیادہ ہے۔`);
   }

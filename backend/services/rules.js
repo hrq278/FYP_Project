@@ -9,6 +9,8 @@
  *   - health: healthy 25, uncertain 12, foot-and-mouth or lumpy skin 0
  *   - confidence: 10 x mean of the species, breed and health confidences
  * Verdict from score: >= 70 recommended, >= 45 caution, otherwise not recommended; then the caps below.
+ * Caps: disease -> not recommended; unclear health, low confidence, or a reliable age outside the purpose's
+ * useful range (e.g. a 14-year-old cow for milk) -> at best caution; Qurbani under 2 years -> not recommended.
  */
 
 const RECOMMENDED_AT = 70;
@@ -116,6 +118,22 @@ const evaluate = (input) => {
       atBestCaution(state);
       flags.push("qurbani_age_unclear");
       risks.push("Confirm at least 2 permanent front teeth (do daant) in person before buying for Qurbani.");
+    }
+  }
+
+  // Reliable age, but outside every useful band for this purpose (Qurbani has its own rule above)
+  if (purpose !== "qurbani" && age?.age_years != null && !age.uncertain) {
+    const table = AGE_RANGES[purpose] || AGE_RANGES.other;
+    const bands = table.bands;
+    if (!bands.some(([lo, hi]) => age.age_years >= lo && age.age_years <= hi)) {
+      atBestCaution(state);
+      const young = age.age_years < Math.min(...bands.map(([lo]) => lo));
+      flags.push(young ? "too_young_for_purpose" : "too_old_for_purpose");
+      risks.push(
+        young
+          ? `At about ${age.age_years} year${age.age_years === 1 ? "" : "s"} it is young for ${PURPOSE_LABEL[purpose] || "your purpose"}: it may take time before it is productive.`
+          : `At about ${age.age_years} years it is old for ${PURPOSE_LABEL[purpose] || "your purpose"}: expect fewer productive years; check the teeth and udder or body condition in person.`
+      );
     }
   }
 

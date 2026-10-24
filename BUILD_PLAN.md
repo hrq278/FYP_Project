@@ -322,11 +322,14 @@ Tasks:
 
 **Done when:** `docs/results/` has metrics for all models and the docs folder is ready to paste into the FYP report.
 
-*Done:* `ml-service/eval/evaluate.py` + `end_to_end.py`, `docs/results/`, `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/PROMPTS_FULL.md`, `docs/screenshots/` (31 screens × 2 languages), `docs/field_test.md` + `.csv`, `ml-service/notebooks/` (breed notebook + README for all models). Species notebook still missing (FIXES.md item 7); field test pending (item 11).
+*Done:* `ml-service/eval/evaluate.py` + `end_to_end.py`, `docs/results/`, `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/PROMPTS_FULL.md`, `docs/screenshots/` (31 screens × 2 languages), `docs/field_test.md` + `.csv`, `ml-service/notebooks/` (breed notebook + README for all models). Species notebook still missing (FIXES.md item 4); field test pending (item 8).
 
 ---
 
-## Module 10 — Deployment and optional extras
+## Module 10 — Deployment and optional extras ⏸ Deployment deferred (2026-10-24)
+
+> **Decision (team, 2026-10-24):** no deployment for now (no budget). The project runs on the project PC for demos. Done instead: one-click start (`START_MaweshiAI.bat`, `scripts/start.ps1`), automatic MongoDB fallback for networks that block DNS (`backend/config/db.js`), demo account with sample reports (`backend/scripts/seed_demo.js`), presenter guide (`DEMO.md`), and a rule fix found while preparing the demo (an animal too old or too young for the purpose is at best "caution"). The tasks below stay for later.
+
 
 Tasks:
 - Deploy backend + ML service (Render / Railway / a small VPS; ML service needs about 2 GB RAM). Use the non-SRV `mongodb://` Atlas string if the network blocks DNS TXT lookups (see status doc).

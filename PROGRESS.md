@@ -4,6 +4,29 @@ One entry per module session. Newest first. See [BUILD_PLAN.md](BUILD_PLAN.md) f
 
 ---
 
+## Module 10 — Demo setup on this PC (deployment deferred) (2026-10-24)
+
+**Status:** done for the demo setup. The team decided not to deploy for now (no budget): the project runs on this PC and is used for demos. Deployment, the APK (EAS build) and the optional extras (OTP / Google login, on-device model, weight estimation, retrained models) stay open in BUILD_PLAN.md.
+
+### What was done
+- **`START_MaweshiAI.bat`** (root, double-click) → `scripts/start.ps1`: checks the installation (Node, the ML service's Python environment, `backend/.env`, the health model file; runs `npm install` if packages are missing), closes copies and windows left from an earlier run, finds the PC's Wi-Fi address and gives it to the app (`EXPO_PUBLIC_API_BASE_URL`, so phones work without editing `mobile/.env`), opens three labelled windows (ML service, backend, app with the Expo QR code), waits until each answers, prepares the demo account and opens Chrome. Running it again restarts everything cleanly.
+- **MongoDB fallback in the backend** (`config/db.js`): if the network blocks the DNS lookup that `mongodb+srv://` needs (5 s check), it connects to the cluster's three servers directly with the same login. Replaces the manual workaround; unit test added.
+- **Demo account** (`backend/scripts/seed_demo.js`, run by the start file when the account is empty; `--force` rebuilds it): `demo@maweshiai.app` / `maweshi123`, 7 real checks run through the models with photos from the breed test split and the dentition dataset: 4 recommended (Sahiwal, Nili-Ravi, Tharparkar, Gir), 2 caution (Holsteins aged about 10 and 14), 1 not recommended (Gir for Qurbani, about 1 year old), two of them in Urdu.
+- **Rule fix found while preparing the demo:** a 14-year-old cow for milk at 32 % over budget scored "recommended 80", because age is only 25 of 100 points. Now a reliable age outside the purpose's useful range (`AGE_RANGES`, e.g. milk 2–8 years) caps the verdict at caution with a plain risk line in English and Urdu ("At about 14 years it is old for milk…"). Qurbani keeps its own rule. 4 rule tests + 1 report test.
+- **`DEMO.md`**: how to start and stop, the demo account, phone setup (Expo Go, same Wi-Fi or phone hotspot, firewall prompt), a 5-minute demo script with the numbers to quote, and a troubleshooting table.
+- Screenshots retaken with the demo account now that Cloudinary stores photos (`docs/screenshots/`).
+- FIXES.md: Cloudinary, the old phone IP and the MongoDB DNS item are solved and removed; the rest renumbered (LLM key is now item 1).
+
+### How it was tested
+- Ran the start file three times from a terminal: all three services ready, demo account created on the first run and reused after; the second start closed the earlier windows (3 windows open afterwards). Logged in as the demo user in Chrome through the LAN address: History shows the 7 reports with photos, no page errors.
+- Backend: **76 tests** pass. ML service: 56.
+
+### Open items
+- Phone test with Expo Go (FIXES.md item 2); LLM key (item 1).
+- Deployment / APK when there is a budget (BUILD_PLAN.md Module 10).
+
+---
+
 ## Module 9 — Testing, evaluation and documentation (2026-10-24)
 
 **Status:** done. The field test at a mandi (FIXES.md item 11) and the species notebook (item 7) are left for the team.

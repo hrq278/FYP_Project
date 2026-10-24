@@ -8,6 +8,10 @@ MUET Jamshoro FYDP — Haroon Rasheed (22CS070), Abdul Mutali (22CS114), Syed Ei
 - Thesis material: [architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [model results](docs/results/README.md) · [LLM prompts](docs/PROMPTS.md) · [screenshots](docs/screenshots/README.md) · [field test](docs/field_test.md) · [how each model was trained](ml-service/notebooks/README.md)
 - Re-measure the models: `cd ml-service && pip install -r requirements-dev.txt && python eval/evaluate.py --help`
 
+## Quick start (demo on this PC)
+
+Double-click **`START_MaweshiAI.bat`**. It starts the ML service, backend and app in three windows, prepares the demo account (`demo@maweshiai.app` / `maweshi123`) and opens the app in Chrome. How to present it, use it on a phone and fix common problems: **[DEMO.md](DEMO.md)**. The sections below are for setting the project up on a new PC.
+
 ## Services
 
 | Folder | Stack | Port |
@@ -60,7 +64,7 @@ npm install
 npm run dev
 ```
 
-If startup fails with `queryTxt ETIMEOUT`, the network is blocking the DNS lookups that `mongodb+srv://` strings need. Use the standard `mongodb://host1,host2,host3/?tls=true&authSource=admin&replicaSet=...` form instead (see [docs/STATUS_2026-10-23.md](docs/STATUS_2026-10-23.md)).
+If the network blocks the DNS lookups that `mongodb+srv://` strings need (common on university Wi-Fi), the backend notices and connects to the cluster's servers directly (`backend/config/db.js`; override the hosts with `MONGO_DIRECT_HOSTS` and `MONGO_REPLICA_SET` if the cluster changes).
 
 ### 3. Mobile
 

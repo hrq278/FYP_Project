@@ -72,6 +72,33 @@ describe("Qurbani age rule", () => {
   });
 });
 
+describe("age outside the purpose's useful range", () => {
+  test("a 14-year-old cow for milk is at best caution with an age risk", () => {
+    const r = evaluate(healthyCow({ age: { age_years: 14, interval_90: [13, 15], uncertain: false, quality: { ok: true } } }));
+    expect(r.verdict).toBe("caution");
+    expect(r.score).toBeLessThan(70);
+    expect(r.flags).toContain("too_old_for_purpose");
+    expect(r.risks.join(" ")).toMatch(/old for milk/);
+  });
+
+  test("a 1-year-old heifer for milk is at best caution as too young", () => {
+    const r = evaluate(healthyCow({ age: { age_years: 1, interval_90: [1, 2], uncertain: false, quality: { ok: true } } }));
+    expect(r.verdict).toBe("caution");
+    expect(r.flags).toContain("too_young_for_purpose");
+  });
+
+  test("an age inside the range or an uncertain age adds no age cap", () => {
+    expect(evaluate(healthyCow()).flags).not.toContain("too_old_for_purpose");
+    const unsure = evaluate(healthyCow({ age: { age_years: 14, interval_90: [6, 15], uncertain: true } }));
+    expect(unsure.flags).not.toContain("too_old_for_purpose");
+  });
+
+  test("Qurbani keeps its own age rule", () => {
+    const r = evaluate(healthyCow({ purpose: "qurbani", age: { age_years: 14, interval_90: [13, 15], uncertain: false } }));
+    expect(r.flags).not.toContain("too_old_for_purpose");
+  });
+});
+
 describe("confidence and price", () => {
   test("any core confidence below 0.6 is at best caution", () => {
     const r = evaluate(healthyCow({ breed: { label: "Sahiwal", confidence: 0.4, uncertain: false } }));

@@ -2,7 +2,7 @@
 
 Every screen in English (`en/`) and Urdu (`ur/`, right-to-left), at phone size (390 × 844 points, 2× pixels), taken from the running app in Chrome with the real backend and ML service. The PDF is shown at A4 width.
 
-Taken 2026-10-24. Photos show "Photo not stored" because the Cloudinary account isn't working yet (FIXES.md item 1); reports were written by the rule template because there is no LLM key yet (FIXES.md item 2). Regenerate after both are fixed.
+Taken 2026-10-24 with the demo account (`DEMO.md`). Reports were written by the rule template because there is no LLM key yet (FIXES.md item 1); retake them once the key is set.
 
 | # | Screen | English | Urdu |
 |---|---|---|---|
