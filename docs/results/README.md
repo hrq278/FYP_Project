@@ -61,4 +61,5 @@ Tuned only on separate data (the breed project's validation split and Animals-10
 - **Not-cattle**: Animals-10 (Hugging Face `Rapidata/Animals-10`: cat, chicken, dog, elephant, horse, sheep) + 37 Wikimedia Commons photos. Horses are the hardest case (11/60 accepted): brown cattle share ImageNet's "sorrel" class.
 - **Age**: the age project's holdout fold (never used for training).
 - **Health**: five public GitHub sets (`11Adars`, `tleeds1`, `Abdo965`, `SuryaGudipati21`, `shubh-07-lk`). They may overlap the Hugging Face model's training data, so these numbers are likely optimistic; real mandi photos are needed (field test).
+- **Health false alarms on spotted coats**: Rathi cows with dense white-spotted coats were called lumpy skin in 6 of 7 breed-dataset photos (scores 0.6–0.8; found while building `demo_images/`). Spotted breeds need a vet's look before trusting a lumpy-skin flag.
 - No GPU; times are single-photo calls after warm-up.

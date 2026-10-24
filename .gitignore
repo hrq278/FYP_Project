@@ -34,3 +34,8 @@ desktop.ini
 
 # Built Android app (download link in DEMO.md)
 /apk/
+
+# Demo / test photos: dataset licences (teeth photos may not be redistributed). Only the README and source list are shared.
+/demo_images/*
+!/demo_images/README.md
+!/demo_images/SOURCES.csv

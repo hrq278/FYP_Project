@@ -19,7 +19,7 @@ Everything runs on this PC. The app talks to three cloud services, so **the PC n
 
 In Chrome press **F12**, then **Ctrl + Shift + M** and pick a phone (e.g. "iPhone 12 Pro") so the app looks like a phone. Press F12 again to hide the tools. Zoom the page (Ctrl +) if the room is large.
 
-Photos: on a laptop, use **Gallery** on each camera screen to pick photos from the PC. Keep a folder ready with 4 side photos and 1 teeth photo of the same animal.
+Photos: use **Gallery** on each camera screen. Ready-made sets are in **`demo_images/`** (10 cows and buffaloes with front, back, left, right and teeth photos, plus 5 other animals that the app turns away); see `demo_images/README.md` for what each one gives.
 
 ## Show it on a phone: installed app (APK), recommended
 

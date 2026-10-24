@@ -1,0 +1,56 @@
+folder,photo,source_file
+01_Sahiwal_cow,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/sahiwal/DS02__Sahiwal_344.png
+01_Sahiwal_cow,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/sahiwal/DS02__Sahiwal_52.jpg
+01_Sahiwal_cow,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/sahiwal/DS02__Sahiwal_20.jpg
+01_Sahiwal_cow,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/sahiwal/DS02__Sahiwal_41.jpg
+01_Sahiwal_cow,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 5 year/grp_4_127.png
+02_Gir_cow,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/gir/DS05__download-9-_jpeg.rf.6315d22e14dccf363d414a8cd95690ec.jpg
+02_Gir_cow,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/gir/DS04__gir_0106.jpg
+02_Gir_cow,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/gir/DS04__gir_0340.jpg
+02_Gir_cow,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/gir/DS02__Gir_110.jpg
+02_Gir_cow,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 4 year/grp_3_53.png
+03_Tharparkar_cow,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/tharparkar/DS05__515Z2YAqSkL_jpg.rf.4b5e3601714a71edc71baaf9835f4ef2.jpg
+03_Tharparkar_cow,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/tharparkar/DS02__Tharparkar_74.png
+03_Tharparkar_cow,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/tharparkar/DS02__Tharparkar_160.jpg
+03_Tharparkar_cow,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/tharparkar/DS05__sddefault_jpg.rf.21252abf22e423fcc105f02f35c782ad.jpg
+03_Tharparkar_cow,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 6 year/grp_5_1.png
+04_Red_Sindhi_cow,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/red-sindhi/DS06__Red_Sindhi_160__aug2_red-sindhi_63.png
+04_Red_Sindhi_cow,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/red-sindhi/DS04__red_sindhi_0063__aug1_red-sindhi_54.png
+04_Red_Sindhi_cow,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/red-sindhi/DS02__Red_Sindhi_34.jpg
+04_Red_Sindhi_cow,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/red-sindhi/DS02__Red_Sindhi_57.jpg
+04_Red_Sindhi_cow,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 3 year/grp_2_1.png
+05_Kankrej_bull,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/kankrej/DS05__stock-photo-india-kankrej-cattle-color-image-2487319107_jpg.rf.e707eb7e92504e7b3907162e9cc3d0bd.jpg
+05_Kankrej_bull,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/kankrej/DS02__Kankrej_152__topup1_54.jpg
+05_Kankrej_bull,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/kankrej/DS09__kankarej_52.jpg
+05_Kankrej_bull,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/kankrej/DS09__kankarej_64.jpg
+05_Kankrej_bull,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 7 year/grp_6_7.png
+06_Holstein_Friesian_cow,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/holstein-friesian/DS08__Holstein_Friesian_174_jpg.rf.8566d9047888f0549731debf94442570.jpg
+06_Holstein_Friesian_cow,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/holstein-friesian/DS08__Holstein_Friesian_279_jpg.rf.1a65195639e071f17970e32ad8d1373f.jpg
+06_Holstein_Friesian_cow,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/holstein-friesian/DS08__Holstein_Friesian_285_jpg.rf.823afba32b91ee5af36e753e3affe943.jpg
+06_Holstein_Friesian_cow,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/holstein-friesian/DS08__Holstein_Friesian_307_jpg.rf.76d98faef0d08aa44cc8d2f5a6d358eb.jpg
+06_Holstein_Friesian_cow,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 4 year/grp_3_54.png
+07_Rathi_cow,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/rathi/DS04__rathi_0138__aug1_rathi_123.png
+07_Rathi_cow,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/rathi/DS02__Screenshot (955).png
+07_Rathi_cow,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/rathi/DS04__rathi_0042__aug1_rathi_32.jpg
+07_Rathi_cow,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/rathi/DS02__00000074.jpg
+07_Rathi_cow,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 5 year/grp_4_199.png
+08_Nili-Ravi_buffalo,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/nili-ravi/DS10__Nili_Ravi_33__aug3_nili-ravi_76.jpg
+08_Nili-Ravi_buffalo,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/nili-ravi/DS04__nili_ravi_0012.jpg
+08_Nili-Ravi_buffalo,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/nili-ravi/DS10__Nili_Ravi_21__aug4_nili-ravi_57.jpg
+08_Nili-Ravi_buffalo,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/nili-ravi/DS04__nili_ravi_0024.jpg
+08_Nili-Ravi_buffalo,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 6 year/grp_5_22.png
+09_Jaffarabadi_buffalo,front,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/jaffarabadi/DS04__jaffarabadi_0097.jpg
+09_Jaffarabadi_buffalo,back,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/jaffarabadi/DS08__Jaffrabadi_23_png.rf.4d73b1309c969eaa67fcce533acd4007.jpg
+09_Jaffarabadi_buffalo,left,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/jaffarabadi/DS04__jaffarabadi_0030.png
+09_Jaffarabadi_buffalo,right,F:/FYP/Models/Breed/cattle-breed-classification-dataset/Master-Dataset/master_dataset/master_dataset/test/../val/jaffarabadi/DS04__jaffarabadi_0040.png
+09_Jaffarabadi_buffalo,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 8 year/grp_7_32.png
+10_Murrah_buffalo,front,Hugging Face SynthAIzer/indian-cattle-buffalo-breeds: test/Buffalo_MURRAH/Buffalo_MURRAH_test_005_aug8.jpg
+10_Murrah_buffalo,back,Hugging Face SynthAIzer/indian-cattle-buffalo-breeds: test/Buffalo_MURRAH/Buffalo_MURRAH_test_006_aug12.jpg
+10_Murrah_buffalo,left,Hugging Face SynthAIzer/indian-cattle-buffalo-breeds: test/Buffalo_MURRAH/Buffalo_MURRAH_test_000_aug0.jpg
+10_Murrah_buffalo,right,Hugging Face SynthAIzer/indian-cattle-buffalo-breeds: test/Buffalo_MURRAH/Buffalo_MURRAH_test_001_aug0.jpg
+10_Murrah_buffalo,teeth,F:/FYP/Models/Age Detection/Dataset/Dataset/Cattle Dentition Dataset/up to 9 year/grp_8_1.png
+not_cattle,1_goat.jpg,Wikimedia Commons: File:Domestic_goat.jpg
+not_cattle,2_sheep.jpg,Wikimedia Commons: File:Sheep.jpg
+not_cattle,3_camel.jpg,Wikimedia Commons: File:Camel.jpg
+not_cattle,4_horse.jpg,F:/FYP/Le/draftsource/ml-service/tests/fixtures/not_cattle/Nokota_Horses_cropped.jpg
+not_cattle,5_dog.jpg,Wikimedia Commons: File:Labrador_Retriever_portrait.jpg
