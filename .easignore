@@ -1,5 +1,7 @@
 # Files EAS Build uploads for the Android app: only the mobile/ folder is needed.
 # (When this file exists EAS ignores .gitignore, so the usual exclusions are repeated here.)
+# Git history holds every committed file (ML models, screenshots): not needed to build the app
+.git
 /backend/
 /ml-service/
 /docs/
