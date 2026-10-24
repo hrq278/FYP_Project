@@ -38,7 +38,11 @@
       "typedRoutes": false
     },
     "extra": {
-      "supportsRTL": true
+      "supportsRTL": true,
+      "router": {},
+      "eas": {
+        "projectId": "92e91bde-4bed-487f-8634-7d2e09a55898"
+      }
     },
     "android": {
       "backgroundColor": "#FAF7F0",
@@ -47,13 +51,27 @@
         "backgroundColor": "#1F5F3A"
       },
       "package": "com.maweshiai.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
-    "icon": "./assets/images/icon.png"
+    "icon": "./assets/images/icon.png",
+    "owner": "hrq278",
+    "updates": {
+      "url": "https://u.expo.dev/92e91bde-4bed-487f-8634-7d2e09a55898"
+    },
+    "ios": {},
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }
