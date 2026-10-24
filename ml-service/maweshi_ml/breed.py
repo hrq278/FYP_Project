@@ -54,13 +54,19 @@ class BreedModel:
         image = image.crop((left, top, left + size, top + size))
         return self._normalise(image)
 
-    def predict(self, images: list[Image.Image], species: str | None = None) -> dict:
+    def predict(self, images: list[Image.Image], species: str | None = None, species_confidence: float | None = None) -> dict:
         batch = np.stack([v for im in images for v in self.views(im)])
         probs = self._infer(tf.constant(batch)).numpy()
         mean = probs.mean(axis=0)  # over all views of all photos
 
-        # Only the breeds of the detected species can win; renormalise over them
+        # Only the breeds of the detected species can win; renormalise over them. A doubtful species call
+        # doesn't filter (models.yaml: species_filter_min_confidence), but a breed of the other species is then
+        # marked uncertain so the report never states it as fact.
         allowed = self.cfg["species_classes"].get(species) if species else None
+        min_conf = self.cfg.get("species_filter_min_confidence")
+        conflict_check = None
+        if allowed and species_confidence is not None and min_conf is not None and species_confidence < min_conf:
+            conflict_check, allowed = allowed, None
         mask = np.array([name in allowed for name in self.labels]) if allowed else np.ones(len(self.labels), bool)
         gated = np.where(mask, mean, 0.0)
         gated = gated / gated.sum() if gated.sum() > 0 else mean
@@ -69,11 +75,13 @@ class BreedModel:
         top = order[0]
         names = self.cfg["display_names"]
         confidence = float(gated[top])
+        species_conflict = bool(conflict_check) and self.labels[top] not in conflict_check
         return {
             "breed": names.get(self.labels[top], self.labels[top]),
             "breed_key": self.labels[top],
             "confidence": round(confidence, 4),
-            "uncertain": confidence < self.cfg["uncertain_threshold"],
+            "uncertain": confidence < self.cfg["uncertain_threshold"] or species_conflict,
+            "species_conflict": species_conflict,
             "top3": [
                 {"breed": names.get(self.labels[i], self.labels[i]), "breed_key": self.labels[i],
                  "confidence": round(float(gated[i]), 4)}

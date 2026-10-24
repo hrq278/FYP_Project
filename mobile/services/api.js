@@ -90,7 +90,7 @@ export default api;
 // Q&A about one evaluation. Throws axios errors; a 503 body carries default suggestions.
 export const askQuestion = async (id, message) => (await api.post(`/api/evaluations/${id}/chat`, { message }, { timeout: 60000 })).data;
 
-export const compareEvaluations = async (ids) => (await api.post("/api/evaluations/compare", { ids }, { timeout: 60000 })).data;
+export const compareEvaluations = async (ids, language) => (await api.post("/api/evaluations/compare", { ids, language }, { timeout: 60000 })).data;
 
 export const deleteAccount = async () => (await api.delete("/api/auth/account")).data;
 

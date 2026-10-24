@@ -48,8 +48,8 @@ module.exports = {
   MLServiceError,
   quality: (file) => post("/quality", [{ field: "image", file }]),
   species: (file) => post("/predict/species", [{ field: "image", file }]),
-  breed: (files, species) =>
-    post("/predict/breed", files.map((file) => ({ field: "images", file })), { species }),
+  breed: (files, species, speciesConfidence) =>
+    post("/predict/breed", files.map((file) => ({ field: "images", file })), { species, species_confidence: speciesConfidence }),
   // The teeth photo is always scored; its quality result says whether the number can be trusted
   age: (file) => post("/predict/age?enforce_quality=false", [{ field: "image", file }]),
   health: (files, views) =>

@@ -21,6 +21,7 @@ const fakeUpload = async (buffer, { evaluationId, view }) => ({
   publicId: `maweshiai/evaluations/${evaluationId}/${view}`
 });
 
+const mongoose = require("mongoose");
 const request = require("supertest");
 const app = require("../app");
 const db = require("./db");
@@ -116,6 +117,7 @@ describe("POST /api/evaluations", () => {
     // breed gets front + left + right, health gets the four body views (not teeth)
     expect(ml.breed.mock.calls[0][0]).toHaveLength(3);
     expect(ml.breed.mock.calls[0][1]).toBe("cow");
+    expect(ml.breed.mock.calls[0][2]).toBe(0.94); // species confidence: the ML service filters breeds only when it is high
     expect(ml.health.mock.calls[0][1]).toEqual(["front", "back", "left", "right"]);
     expect(ml.health.mock.calls[0][0]).toHaveLength(4);
   });
@@ -376,12 +378,23 @@ describe("Module 7 backend", () => {
   });
 });
 
+test("processing step summaries follow the report language", async () => {
+  const auth = await token();
+  const { id } = (await submit(auth, { language: "ur" })).body;
+  const e = await waitUntilFinished(auth, id);
+  const summary = (key) => e.steps.find((s) => s.key === key).summary;
+  expect(summary("species")).toBe("گائے (94%)");
+  expect(summary("health")).toBe("بیماری کی کوئی علامت نہیں");
+  expect(summary("report")).toBe("رپورٹ تیار");
+});
+
 test("date search uses the phone's timezone", async () => {
   const auth = await token();
   const { id } = (await submit(auth)).body;
   await waitUntilFinished(auth, id);
   // Pretend it was created at 23 Oct 21:30 UTC = 24 Oct 02:30 in Pakistan (UTC+5)
-  await Evaluation.updateOne({ _id: id }, { $set: { createdAt: new Date(Date.UTC(2026, 9, 23, 21, 30)) } });
+  // Raw driver: Mongoose treats createdAt as immutable and would silently drop this $set
+  await Evaluation.collection.updateOne({ _id: new mongoose.Types.ObjectId(id) }, { $set: { createdAt: new Date(Date.UTC(2026, 9, 23, 21, 30)) } });
   const q = (s, tz) => request(app).get(`/api/evaluations?q=${encodeURIComponent(s)}${tz != null ? `&tz=${tz}` : ""}`).set("Authorization", `Bearer ${auth}`);
   expect((await q("24 Oct 2026", -300)).body.total).toBe(1);
   expect((await q("23 Oct 2026", -300)).body.total).toBe(0);

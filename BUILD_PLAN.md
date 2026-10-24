@@ -309,7 +309,7 @@ Tasks:
 
 ---
 
-## Module 9 — Testing, evaluation and documentation (thesis material)
+## Module 9 — Testing, evaluation and documentation (thesis material) ✅ Done 2026-10-24
 
 Tasks:
 - `ml-service/notebooks/` — training notebooks for all 4 models (team provides), cleaned.
@@ -321,6 +321,8 @@ Tasks:
 - Field-test template `docs/field_test.md`: animal #, true breed/age (from owner), predicted, verdict, user feedback (1–5).
 
 **Done when:** `docs/results/` has metrics for all models and the docs folder is ready to paste into the FYP report.
+
+*Done:* `ml-service/eval/evaluate.py` + `end_to_end.py`, `docs/results/`, `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/PROMPTS_FULL.md`, `docs/screenshots/` (31 screens × 2 languages), `docs/field_test.md` + `.csv`, `ml-service/notebooks/` (breed notebook + README for all models). Species notebook still missing (FIXES.md item 7); field test pending (item 11).
 
 ---
 

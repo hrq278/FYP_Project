@@ -1,0 +1,79 @@
+{
+  "model": "cattle gate (ImageNet EfficientNetV2-B0) + cow/buffalo decision",
+  "version": {
+    "gate": "imagenet-efficientnetv2-b0",
+    "species": "specie-detector-mobilenetv2-v1"
+  },
+  "threshold": 0.02,
+  "n": {
+    "cattle": 1602,
+    "buffalo": 121,
+    "not_cattle": 375
+  },
+  "accuracy_3class": 0.8639,
+  "macro_f1": 0.7508,
+  "cattle_accepted": 0.9451,
+  "not_cattle_rejected": 0.9413,
+  "cow_vs_buffalo_accuracy_on_accepted": 0.895,
+  "per_class": {
+    "cow": {
+      "precision": 0.9644,
+      "recall": 0.8609,
+      "f1-score": 0.9097
+    },
+    "buffalo": {
+      "precision": 0.3738,
+      "recall": 0.6612,
+      "f1-score": 0.4776
+    },
+    "unknown": {
+      "precision": 0.8005,
+      "recall": 0.9413,
+      "f1-score": 0.8652
+    }
+  },
+  "not_cattle_accepted_by_group": {
+    "cat": "0/60",
+    "chicken": "0/60",
+    "dog": "0/60",
+    "elephant": "1/40",
+    "horse": "11/60",
+    "not_cattle": "2/35",
+    "sheep": "8/60"
+  },
+  "cattle_correct_by_source": {
+    "cow": "123/150",
+    "test": "1232/1452"
+  },
+  "confusion_matrix": {
+    "labels": [
+      "cow",
+      "buffalo",
+      "unknown"
+    ],
+    "matrix": [
+      [
+        1275,
+        124,
+        82
+      ],
+      [
+        35,
+        80,
+        6
+      ],
+      [
+        12,
+        10,
+        353
+      ]
+    ]
+  },
+  "timing_cpu": {
+    "gate_per_photo": {
+      "mean_ms": 77.8,
+      "p95_ms": 125.7,
+      "calls": 1977
+    }
+  }
+}

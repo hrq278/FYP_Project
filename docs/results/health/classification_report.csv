@@ -1,0 +1,6 @@
+class,precision,recall,f1,support
+foot-and-mouth,0.972,0.981,0.977,107
+healthy,0.958,0.938,0.948,145
+lumpy,0.940,0.955,0.947,132
+macro avg,0.957,0.958,0.957,384
+weighted avg,0.956,0.956,0.956,384

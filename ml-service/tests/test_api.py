@@ -154,6 +154,27 @@ def test_breed_without_species_uses_all_classes(client):
     assert body["species_filter"] is None
 
 
+def test_breed_doubtful_species_does_not_filter_but_flags_conflict(client):
+    # Buffalo photos, but the species step said "cow" with low confidence
+    body = client.post("/predict/breed", files=many(BUFFALO), data={"species": "cow", "species_confidence": "0.6"}).json()
+    assert body["species_filter"] is None
+    conflict = body["breed_key"] in {"nili-ravi", "jaffarabadi"}
+    assert body["species_conflict"] is conflict
+    if conflict:
+        assert body["uncertain"] is True
+
+
+def test_breed_confident_species_still_filters(client):
+    body = client.post("/predict/breed", files=many(BUFFALO), data={"species": "cow", "species_confidence": "0.95"}).json()
+    assert body["species_filter"] == "cow"
+    assert body["species_conflict"] is False
+    assert body["breed_key"] not in {"nili-ravi", "jaffarabadi"}
+
+
+def test_breed_rejects_bad_species_confidence(client):
+    assert client.post("/predict/breed", files=many(COW), data={"species": "cow", "species_confidence": "2"}).status_code == 422
+
+
 def test_breed_rejects_bad_species(client):
     assert client.post("/predict/breed", files=many(COW), data={"species": "goat"}).status_code == 400
 

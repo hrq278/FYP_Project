@@ -1,0 +1,157 @@
+{
+  "model": "EfficientNet-B3 (xprotocol/EfficientNet-B3-Cattle-Disease)",
+  "version": "efficientnet-b3-baseline-v1",
+  "test_sets": "5 public GitHub sets (may overlap the model's training data; reported per source)",
+  "n": 384,
+  "labels": {
+    "lumpy": 132,
+    "healthy": 145,
+    "foot-and-mouth": 107
+  },
+  "top1_accuracy": 0.9557,
+  "macro_precision": 0.9568,
+  "macro_recall": 0.9579,
+  "macro_f1": 0.9573,
+  "app_decision": {
+    "sick_called_healthy": 0.0167,
+    "healthy_called_sick": 0.0414,
+    "uncertain_rate": 0.0339
+  },
+  "per_class": {
+    "foot-and-mouth": {
+      "precision": 0.9722,
+      "recall": 0.9813,
+      "f1-score": 0.9767,
+      "support": 107.0
+    },
+    "healthy": {
+      "precision": 0.9577,
+      "recall": 0.9379,
+      "f1-score": 0.9477,
+      "support": 145.0
+    },
+    "lumpy": {
+      "precision": 0.9403,
+      "recall": 0.9545,
+      "f1-score": 0.9474,
+      "support": 132.0
+    }
+  },
+  "per_source": {
+    "abdo": {
+      "n": 47,
+      "top1": 0.9362,
+      "labels": {
+        "lumpy": 27,
+        "healthy": 20
+      }
+    },
+    "adars": {
+      "n": 240,
+      "top1": 0.9708,
+      "labels": {
+        "foot-and-mouth": 80,
+        "healthy": 80,
+        "lumpy": 80
+      }
+    },
+    "shubh": {
+      "n": 4,
+      "top1": 1.0,
+      "labels": {
+        "foot-and-mouth": 4
+      }
+    },
+    "surya": {
+      "n": 8,
+      "top1": 0.875,
+      "labels": {
+        "foot-and-mouth": 3,
+        "healthy": 4,
+        "lumpy": 1
+      }
+    },
+    "tleeds": {
+      "n": 85,
+      "top1": 0.9294,
+      "labels": {
+        "foot-and-mouth": 20,
+        "lumpy": 24,
+        "healthy": 41
+      }
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "foot-and-mouth",
+      "healthy",
+      "lumpy"
+    ],
+    "matrix": [
+      [
+        105,
+        1,
+        1
+      ],
+      [
+        2,
+        136,
+        7
+      ],
+      [
+        1,
+        5,
+        126
+      ]
+    ]
+  },
+  "confusion_matrix_app": {
+    "rows": [
+      "foot-and-mouth",
+      "healthy",
+      "lumpy"
+    ],
+    "cols": [
+      "foot-and-mouth",
+      "healthy",
+      "lumpy",
+      "uncertain"
+    ],
+    "matrix": [
+      [
+        105,
+        0,
+        1,
+        1
+      ],
+      [
+        2,
+        132,
+        4,
+        7
+      ],
+      [
+        1,
+        4,
+        122,
+        5
+      ]
+    ]
+  },
+  "timing_cpu": {
+    "per_photo": {
+      "mean_ms": 228.1,
+      "p95_ms": 248.0,
+      "calls": 384
+    }
+  },
+  "teeth_photos_of_healthy_animals": {
+    "n": 449,
+    "result": {
+      "healthy": 159,
+      "foot-and-mouth": 189,
+      "uncertain": 101
+    },
+    "note": "teeth close-ups are out of distribution; the app sends only the 4 body photos"
+  }
+}

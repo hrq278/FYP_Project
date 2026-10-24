@@ -5,6 +5,8 @@ AI cattle-buying advisor for livestock markets (formerly CattleEval / LES). The 
 MUET Jamshoro FYDP — Haroon Rasheed (22CS070), Abdul Mutali (22CS114), Syed Eiman Ali Shah (22CS006). Supervisor: Dr. Fawad Mangi.
 
 - Build plan: [BUILD_PLAN.md](BUILD_PLAN.md) · Progress log: [PROGRESS.md](PROGRESS.md) · Status report: [docs/STATUS_2026-10-23.md](docs/STATUS_2026-10-23.md)
+- Thesis material: [architecture](docs/ARCHITECTURE.md) · [API](docs/API.md) · [model results](docs/results/README.md) · [LLM prompts](docs/PROMPTS.md) · [screenshots](docs/screenshots/README.md) · [field test](docs/field_test.md) · [how each model was trained](ml-service/notebooks/README.md)
+- Re-measure the models: `cd ml-service && pip install -r requirements-dev.txt && python eval/evaluate.py --help`
 
 ## Services
 

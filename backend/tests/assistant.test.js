@@ -184,6 +184,14 @@ describe("POST /api/evaluations/compare", () => {
     expect(res.body.rows.find((r) => r.key === "health")).toEqual({ key: "health", a: "healthy", b: "lumpy" });
   });
 
+  test("the reason follows the app's language, not the reports'", async () => {
+    const auth = await token();
+    const [a, b] = await two(auth, { health: "lumpy" });
+    const res = await request(app).post("/api/evaluations/compare").set("Authorization", `Bearer ${auth}`).send({ ids: [a, b], language: "ur" });
+    expect(res.status).toBe(200);
+    expect(res.body.reason).toMatch(/^جانور A کا اسکور \d+\/100/);
+  });
+
   test("uses the LLM to word the reason when available", async () => {
     const auth = await token();
     const [a, b] = await two(auth, { health: "lumpy" });

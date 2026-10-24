@@ -1,0 +1,2 @@
+animal_no,date,market,species_true,breed_true,age_true_years,teeth_counted,health_true,purpose,price_pkr,report_id,species_pred,breed_pred,breed_uncertain,age_pred_years,age_uncertain,health_pred,verdict,score,time_to_report_s,photo_retakes,network,q1_useful,q2_easy,notes
+1,,,,,,,,,,,,,,,,,,,,,,,,

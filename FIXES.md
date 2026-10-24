@@ -2,7 +2,7 @@
 
 Things only you can do (accounts, keys, devices, data). Claude keeps this list current: solved items are removed, new ones are added.
 
-Last checked: 2026-10-24
+Last checked: 2026-10-24 (Module 9)
 
 ---
 
@@ -22,6 +22,7 @@ Without it, reports use the rule-based template and chat is unavailable.
 1. Create a key at https://console.anthropic.com (Settings → API Keys) and add a little credit (US$5 is plenty).
 2. Add to `backend/.env`: `LLM_API_KEY=<key>` and save.
 3. Run `cd backend` then `node scripts/llm_smoke.js path/to/side-photo.jpg` and send Claude the output so the answers and the Urdu can be checked.
+4. Then ask Claude to re-measure the time per check with the AI report (`ml-service/eval/end_to_end.py`) and retake the screenshots, so the thesis numbers include the LLM.
 
 ## 3. Mobile app points to an old IP
 
@@ -60,10 +61,9 @@ Steps: fix item 3, start ML service + backend + `cd mobile && npx expo start`, s
 
 The link in the PDF's QR code and in WhatsApp messages points to the backend's address (`EXPO_PUBLIC_API_BASE_URL`), which is your PC on the local network. Other people's phones can only open it once the backend is deployed online (Module 10). Nothing to do now; just don't be surprised when it doesn't open outside your network.
 
-## 7. Datasets and training notebooks (needed for Module 9 and the thesis)
+## 7. Species model notebook (for the thesis)
 
-- `F:\FYP\Dataset` is no longer on the drive. If you still have it (breed, FMD, dentition, species folders), put it back or tell Claude where it is; it is needed to re-measure accuracy on your own data.
-- Training notebooks / descriptions still missing for the **species** model and the **health (FMD)** model. Breed and age projects are in `F:\FYP\Models`.
+The breed and age test sets were found in `F:\FYP\Models` and all models are now measured (`docs/results/`), so `F:\FYP\Dataset` is no longer needed. Still missing: the **species** model's training notebook and dataset description (`model/SpecieDetector.keras`). Put it in `ml-service/notebooks/` or tell Claude where it is. If nobody has it, say so in the thesis: the app no longer uses that model's vote (the cattle gate decides cow vs buffalo, see `ml-service/notebooks/README.md`). The health model is third-party (Hugging Face), so no notebook is expected for it.
 
 ## 8. Re-check some breed facts before submitting the thesis
 
@@ -80,3 +80,7 @@ Delete them in Atlas → Browse Collections (`users` and `evaluations`), or ask 
 ## 10. Optional: free 1.8 GB on drive F
 
 `ml-service/.venv.broken-hrq27` is the unusable Python environment copied from the other PC. It can be deleted.
+
+## 11. Field test at a real mandi (for the thesis results chapter)
+
+All accuracy numbers so far come from internet photos. Take the app to a livestock market and check at least 30 animals with their owners' information, following `docs/field_test.md` and filling in `docs/field_test.csv`. Best done after items 1, 2 and 5, and ideally after deployment (Module 10) so it works on mobile data. Send Claude the filled CSV to turn into tables for the thesis.

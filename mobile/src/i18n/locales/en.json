@@ -210,7 +210,7 @@
     "analyzeAnywayBody": "Some photos have problems. The report will be less accurate.",
     "analyzeAnyway": "Analyze anyway",
     "processingTitle": "Checking your animal…",
-    "processingTime": "This takes about 20 seconds",
+    "processingTime": "This usually takes under 20 seconds",
     "keepOpen": "Please keep the app open.",
     "steps": {
       "species": "Species check",

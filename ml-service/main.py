@@ -111,12 +111,13 @@ async def predict_species(image: UploadFile = File(...)) -> dict:
 async def predict_breed(
     images: list[UploadFile] = File(..., description="Front, left and/or right photos"),
     species: str | None = Form(None, description="cow or buffalo, from the species step"),
+    species_confidence: float | None = Form(None, ge=0, le=1, description="the species step's confidence"),
 ) -> dict:
     if species is not None and species not in ("cow", "buffalo"):
         raise HTTPException(status_code=400, detail="species must be 'cow' or 'buffalo'")
     model = _model("breed")
     imgs = await _read_images(images)
-    return await _run("breed", model.predict, imgs, species)
+    return await _run("breed", model.predict, imgs, species, species_confidence)
 
 
 @app.post("/predict/age")

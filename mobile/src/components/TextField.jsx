@@ -75,12 +75,13 @@ const styles = StyleSheet.create({
   prefix: {
     alignSelf: "stretch",
     justifyContent: "center",
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     backgroundColor: colors.surfaceMuted,
     borderEndWidth: 2,
     borderEndColor: colors.border
   },
-  input: { flex: 1, fontSize: 18, fontFamily: fonts.latin[600], color: colors.textPrimary, paddingHorizontal: 16, paddingVertical: 12 },
+  // minWidth 0: on web an input keeps its default ~20-character width and pushes the prefix out of narrow boxes
+  input: { flex: 1, minWidth: 0, fontSize: 18, fontFamily: fonts.latin[600], color: colors.textPrimary, paddingHorizontal: 12, paddingVertical: 12 },
   ltr: { writingDirection: "ltr", textAlign: "left" },
   eye: { paddingHorizontal: 14, minHeight: touch.min, justifyContent: "center" },
   error: { marginTop: 6 }

@@ -1,0 +1,6 @@
+class,precision,recall,f1,support
+cow,0.964,0.861,0.910,1481
+buffalo,0.374,0.661,0.478,121
+unknown,0.800,0.941,0.865,375
+macro avg,0.713,0.821,0.751,1977
+weighted avg,0.897,0.864,0.875,1977

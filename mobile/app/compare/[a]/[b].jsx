@@ -41,16 +41,16 @@ function HealthValue({ value, t }) {
 export default function Compare() {
   const { a, b } = useLocalSearchParams();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null); // { kind, message }
 
   const load = useCallback(() => {
     setError(null);
-    compareEvaluations([a, b])
+    compareEvaluations([a, b], i18n.language === "ur" ? "ur" : "en")
       .then(setData)
       .catch((e) => setError({ kind: errorKind(e), message: e.response?.data?.message }));
-  }, [a, b]);
+  }, [a, b, i18n.language]);
 
   useEffect(load, [load]);
 

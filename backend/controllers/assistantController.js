@@ -87,7 +87,7 @@ const templateReason = (winner, other, purpose, language) => {
   return `Animal ${winner.letter} scores ${winner.score}/100 against ${other.score}/100 for ${forPurpose}` + (why.length ? ` (${why.join(", ")}).` : ".");
 };
 
-// POST /api/evaluations/compare { ids: [a, b] }
+// POST /api/evaluations/compare { ids: [a, b], language? }
 const compare = async (req, res) => {
   const ids = req.body?.ids;
   if (!Array.isArray(ids) || ids.length !== 2 || new Set(ids).size !== 2 || !ids.every((id) => mongoose.isValidObjectId(id))) {
@@ -114,7 +114,8 @@ const compare = async (req, res) => {
         ? (HEALTH_RANK[A.health] ?? 2) > (HEALTH_RANK[B.health] ?? 2)
         : true;
   const [winner, other] = winsA ? [A, B] : [B, A];
-  const language = a.language || "en";
+  // The app's current language wins; otherwise the language the first report was written in
+  const language = ["en", "ur"].includes(req.body.language) ? req.body.language : a.language || "en";
 
   let reason = templateReason(winner, other, a.purpose, language);
   let reasonSource = "template";

@@ -25,6 +25,7 @@ class CattleGate:
         self.cow_idx = [index[n] for n in cfg["cow_classes"]]
         self.buffalo_idx = [index[n] for n in cfg["buffalo_classes"]]
         self.context_idx = [index[n] for n in cfg.get("context_classes", [])]
+        self.sheep_idx = [index[n] for n in cfg.get("sheep_classes", [])]
         self.names = {i: n for n, i in index.items()}
         # EfficientNetV2 includes its own rescaling: feed RGB 0-255
         self.model = keras.applications.EfficientNetV2B0(weights=os.path.join(base_dir, cfg["path"]))
@@ -38,9 +39,13 @@ class CattleGate:
         p = self._infer(tf.constant(batch)).numpy().mean(axis=0)  # photo and mirror image averaged
         cow, buffalo = float(p[self.cow_idx].sum()), float(p[self.buffalo_idx].sum())
         score = cow + buffalo + float(p[self.context_idx].sum())
+        # Sheep (ram / bighorn) often carry some "ox" score too; turn them away when that evidence is stronger
+        sheep = float(p[self.sheep_idx].sum()) if self.sheep_idx else 0.0
+        looks_like_sheep = sheep >= self.cfg.get("sheep_ratio", 1.0) * score
         return {
-            "is_cattle": score >= self.cfg["cattle_threshold"],
+            "is_cattle": score >= self.cfg["cattle_threshold"] and not looks_like_sheep,
             "cattle_score": round(score, 4),
+            "sheep_score": round(sheep, 4),
             # Share of the cattle evidence that looks like buffalo (None when there is none)
             "buffalo_share": round(buffalo / (cow + buffalo), 4) if cow + buffalo > 1e-6 else None,
             "top3": [{"label": self.names[i], "p": round(float(p[i]), 4)} for i in p.argsort()[::-1][:3]],

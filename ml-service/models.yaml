@@ -35,6 +35,11 @@ gate:
   # flip @0.02 -> 3.0% / 5.7%. Top-5 rules let bison, goats and pigs through, so not used.
   tta_flip: true
   cattle_threshold: 0.02
+  # Module 9: on 200 Animals-10 sheep, 34 % passed the threshold above (ImageNet sees "ram"/"bighorn" plus a
+  # little "ox"). Rejecting when P(ram + bighorn) >= 1.0 x cattle score: sheep 34 % -> 12 % accepted, cattle
+  # wrongly rejected 5.6 % -> 6.5 % (tuned on the breed validation split + separate Animals-10 photos).
+  sheep_classes: [ram, bighorn]
+  sheep_ratio: 1.0
   source: Keras Applications EfficientNetV2B0, ImageNet-1k weights (Apache-2.0)
 
 breed:
@@ -48,6 +53,10 @@ breed:
     buffalo: [jaffarabadi, nili-ravi]
     cow: [ayrshire, brown-swiss, gir, holstein-friesian, jersey, kankrej, nagori,
           rathi, red-sindhi, sahiwal, tharparkar, umblachery, vechur]
+  # Module 9: filtering by a doubtful species call costs accuracy (breed test split 71.2 % unfiltered vs 64.9 %
+  # always filtered). Filter only when the species step is at least this confident; otherwise a breed of the
+  # other species comes back `uncertain` + `species_conflict`. Test split 70.6 %, independent set +5 points.
+  species_filter_min_confidence: 0.75
   # Display names for the app
   display_names:
     ayrshire: Ayrshire

@@ -1,0 +1,16 @@
+score,threshold,false_accept,false_reject
+gate_score,0.005,0.2053,0.0262
+gate_score,0.01,0.152,0.0381
+gate_score,0.02,0.104,0.0518
+gate_score,0.03,0.072,0.063
+gate_score,0.05,0.0587,0.0836
+gate_score,0.1,0.0373,0.1167
+gate_score,0.2,0.0187,0.1692
+gate_score,0.3,0.016,0.2166
+gate_score,0.5,0.0107,0.3009
+species_score,0.6,0.8747,0.1248
+species_score,0.7,0.7787,0.2316
+species_score,0.8,0.6453,0.3764
+species_score,0.9,0.4133,0.5493
+species_score,0.95,0.288,0.6879
+species_score,0.99,0.1147,0.8727

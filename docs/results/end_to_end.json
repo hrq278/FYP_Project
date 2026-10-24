@@ -1,0 +1,104 @@
+{
+  "runs": [
+    {
+      "status": "done",
+      "upload_s": 0.28,
+      "total_s": 4.07,
+      "upload_kb": 159,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.27,
+      "total_s": 4.41,
+      "upload_kb": 82,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.28,
+      "total_s": 4.04,
+      "upload_kb": 148,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.34,
+      "total_s": 4.75,
+      "upload_kb": 364,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.28,
+      "total_s": 4.25,
+      "upload_kb": 100,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.26,
+      "total_s": 4.55,
+      "upload_kb": 427,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.28,
+      "total_s": 4.17,
+      "upload_kb": 80,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.28,
+      "total_s": 4.92,
+      "upload_kb": 194,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.55,
+      "total_s": 5.65,
+      "upload_kb": 564,
+      "report_source": "template"
+    },
+    {
+      "status": "rejected",
+      "upload_s": 0.42,
+      "total_s": 2.81,
+      "upload_kb": 79,
+      "report_source": null
+    },
+    {
+      "status": "done",
+      "upload_s": 0.51,
+      "total_s": 5.64,
+      "upload_kb": 140,
+      "report_source": "template"
+    },
+    {
+      "status": "done",
+      "upload_s": 0.69,
+      "total_s": 5.47,
+      "upload_kb": 332,
+      "report_source": "template"
+    }
+  ],
+  "n_done": 11,
+  "total_s": {
+    "mean": 4.7,
+    "median": 4.5,
+    "max": 5.7
+  },
+  "upload_s": {
+    "mean": 0.37,
+    "max": 0.69
+  },
+  "upload_kb_mean": 222,
+  "report_source": [
+    "template"
+  ],
+  "setup": "backend + ML service on one laptop CPU (no GPU), local network; photos shrunk like the app (1280 px, JPEG 80)",
+  "summary_md": "11 full evaluations (5 photos, about 222 KB per check): **4.5 s median** from tapping Analyze to the report being ready (mean 4.7 s, slowest 5.7 s); the upload itself took 0.37 s on the local network. Backend and ML service on one laptop CPU (no GPU). Reports were written by the rule template (no LLM key yet); the LLM breed check and AI-written report will add time once the key is set; not measured yet (run this script again then). On mobile data the upload takes longer; at 1 Mbit/s, 222 KB is about 1.8 s."
+}
